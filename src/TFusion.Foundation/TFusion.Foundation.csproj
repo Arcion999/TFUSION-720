@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>TFusion.Foundation</AssemblyName>
+    <RootNamespace>TFusion.Foundation</RootNamespace>
+    <Description>Portable, dependency-minimal engineering foundations for TFUSION-720.</Description>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,18 @@
+<Project>
+  <Target Name="TFusionRepositoryPolicy" BeforeTargets="PrepareForBuild">
+    <Error
+      Condition="'$(AllowUnsafeBlocks)' == 'true'"
+      Text="Unsafe code is prohibited in Milestone 1." />
+  </Target>
+
+  <Target Name="TFusionRejectPrereleasePackages" BeforeTargets="CollectPackageReferences">
+    <ItemGroup>
+      <_TFusionPrereleasePackage
+        Include="@(PackageVersion)"
+        Condition="$([System.String]::Copy('%(PackageVersion.Version)').Contains('-'))" />
+    </ItemGroup>
+    <Error
+      Condition="'@(_TFusionPrereleasePackage)' != ''"
+      Text="Prerelease package versions are prohibited: @(_TFusionPrereleasePackage)" />
+  </Target>
+</Project>
