@@ -55,4 +55,48 @@ public sealed class StrongGuidTests
         Assert.Throws<ArgumentException>(() => DocumentId.Parse(Guid.Empty.ToString("D")));
         Assert.NotEqual(DocumentId.New(), DocumentId.New());
     }
+
+    [Fact]
+    public void M1_U04_AllIdentifierTryParseAndNewPathsAreExercised()
+    {
+        var text = Guid.NewGuid().ToString("D");
+
+        Assert.True(DocumentId.TryParse(text, out var document));
+        Assert.True(ComponentId.TryParse(text, out var component));
+        Assert.True(BodyId.TryParse(text, out var body));
+        Assert.True(FeatureId.TryParse(text, out var feature));
+        Assert.True(SketchId.TryParse(text, out var sketch));
+        Assert.True(SketchEntityId.TryParse(text, out var sketchEntity));
+        Assert.True(ConstraintId.TryParse(text, out var constraint));
+        Assert.True(ParameterId.TryParse(text, out var parameter));
+        Assert.True(CommandId.TryParse(text, out var command));
+
+        Assert.Equal(text, document.ToString());
+        Assert.Equal(text, component.ToString());
+        Assert.Equal(text, body.ToString());
+        Assert.Equal(text, feature.ToString());
+        Assert.Equal(text, sketch.ToString());
+        Assert.Equal(text, sketchEntity.ToString());
+        Assert.Equal(text, constraint.ToString());
+        Assert.Equal(text, parameter.ToString());
+        Assert.Equal(text, command.ToString());
+
+        Assert.NotEqual(ComponentId.New(), ComponentId.New());
+        Assert.NotEqual(BodyId.New(), BodyId.New());
+        Assert.NotEqual(FeatureId.New(), FeatureId.New());
+        Assert.NotEqual(SketchId.New(), SketchId.New());
+        Assert.NotEqual(SketchEntityId.New(), SketchEntityId.New());
+        Assert.NotEqual(ConstraintId.New(), ConstraintId.New());
+        Assert.NotEqual(ParameterId.New(), ParameterId.New());
+        Assert.NotEqual(CommandId.New(), CommandId.New());
+
+        Assert.False(ComponentId.TryParse("invalid", out _));
+        Assert.False(BodyId.TryParse("invalid", out _));
+        Assert.False(FeatureId.TryParse("invalid", out _));
+        Assert.False(SketchId.TryParse("invalid", out _));
+        Assert.False(SketchEntityId.TryParse("invalid", out _));
+        Assert.False(ConstraintId.TryParse("invalid", out _));
+        Assert.False(ParameterId.TryParse("invalid", out _));
+        Assert.False(CommandId.TryParse("invalid", out _));
+    }
 }

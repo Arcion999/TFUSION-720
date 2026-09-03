@@ -86,6 +86,64 @@ public sealed class StartupSentinelTests : IDisposable
         Assert.Equal(FoundationDiagnosticCodes.StartupSessionMismatch, mismatch.Diagnostics[0].Code);
     }
 
+    [Fact]
+    public void UnsupportedMarkerSchemaProducesWarningAndIsReset()
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(MarkerPath)!);
+        File.WriteAllText(MarkerPath, "{\"schemaVersion\":999}");
+
+        var result = new StartupSentinel(MarkerPath).BeginSession(Guid.NewGuid(), DateTimeOffset.UtcNow);
+
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value.PreviousMarkerWasInvalid);
+        Assert.Single(result.Diagnostics);
+    }
+
+    [Fact]
+    public void InvalidSessionArgumentsAreRejected()
+    {
+        var sentinel = new StartupSentinel(MarkerPath);
+
+        Assert.Throws<ArgumentException>(() => sentinel.BeginSession(Guid.Empty, DateTimeOffset.UtcNow));
+        Assert.Throws<ArgumentException>(() => sentinel.MarkClean(Guid.Empty, DateTimeOffset.UtcNow));
+        Assert.Throws<ArgumentException>(() => new StartupSentinel(" "));
+    }
+
+    [Fact]
+    public void CorruptCurrentMarkerMakesMarkCleanFailSafely()
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(MarkerPath)!);
+        File.WriteAllText(MarkerPath, "invalid-json");
+
+        var result = new StartupSentinel(MarkerPath).MarkClean(Guid.NewGuid(), DateTimeOffset.UtcNow);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(FoundationDiagnosticCodes.StartupStateInvalid, result.Diagnostics[0].Code);
+    }
+
+    [Fact]
+    public void PhysicalWriterAtomicallyCreatesAndReplacesContent()
+    {
+        var writer = new PhysicalAtomicTextWriter();
+
+        Assert.True(writer.Write(MarkerPath, "first").IsSuccess);
+        Assert.Equal("first", File.ReadAllText(MarkerPath));
+        Assert.True(writer.Write(MarkerPath, "second").IsSuccess);
+        Assert.Equal("second", File.ReadAllText(MarkerPath));
+        Assert.Empty(Directory.EnumerateFiles(Path.GetDirectoryName(MarkerPath)!, "*.tmp"));
+    }
+
+    [Fact]
+    public void PhysicalWriterReturnsDiagnosticWhenDestinationIsDirectory()
+    {
+        Directory.CreateDirectory(MarkerPath);
+
+        var result = new PhysicalAtomicTextWriter().Write(MarkerPath, "content");
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(FoundationDiagnosticCodes.StartupStateWriteFailed, result.Diagnostics[0].Code);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(testRoot))

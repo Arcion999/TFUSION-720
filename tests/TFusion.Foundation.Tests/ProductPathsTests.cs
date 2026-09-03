@@ -50,6 +50,16 @@ public sealed class ProductPathsTests : IDisposable
         Assert.False(Directory.Exists(Path.Combine(Environment.CurrentDirectory, "TFUSION-720")));
     }
 
+    [Fact]
+    public void DefaultPathsResolveBelowLocalApplicationData()
+    {
+        var result = ProductPaths.CreateDefault();
+
+        Assert.True(result.IsSuccess);
+        Assert.EndsWith("TFUSION-720", result.Value.Root, StringComparison.Ordinal);
+        Assert.All(result.Value.EnumerateDirectories(), path => Assert.True(result.Value.Contains(path)));
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(testRoot))

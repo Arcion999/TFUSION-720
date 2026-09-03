@@ -67,4 +67,26 @@ public sealed class DiagnosticsTests
     {
         Assert.Throws<ArgumentException>(() => new DiagnosticCode(value));
     }
+
+    [Fact]
+    public void NonErrorDiagnosticUsesEmptyImmutableCollections()
+    {
+        var diagnostic = new CadDiagnostic(
+            FoundationDiagnosticCodes.UnsupportedPlatform,
+            DiagnosticSeverity.Information,
+            "Information");
+
+        Assert.False(diagnostic.IsError);
+        Assert.Empty(diagnostic.Context);
+        Assert.Empty(diagnostic.Causes);
+        Assert.Null(diagnostic.TechnicalDetail);
+        Assert.Equal("TFN-FND-0006", diagnostic.Code.ToString());
+    }
+
+    [Fact]
+    public void DiagnosticCodeAcceptsItsEntireDeclaredAlphabet()
+    {
+        var code = new DiagnosticCode("ABC-123_DEF.VALUE");
+        Assert.Equal("ABC-123_DEF.VALUE", code.Value);
+    }
 }

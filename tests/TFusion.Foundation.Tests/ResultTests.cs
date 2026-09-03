@@ -41,4 +41,23 @@ public sealed class ResultTests
         var exception = Assert.Throws<InvalidOperationException>(() => result.Value);
         Assert.Contains("does not contain a value", exception.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void GenericSuccessExposesValueAndImmutableDiagnostics()
+    {
+        var source = new List<CadDiagnostic> { Warning };
+        var result = Result<string>.Success("value", source);
+        source.Clear();
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("value", result.Value);
+        Assert.Single(result.Diagnostics);
+    }
+
+    [Fact]
+    public void EnumerableFailureFactoriesPreserveErrors()
+    {
+        Assert.Single(Result.Failure((IEnumerable<CadDiagnostic>)[Error]).Diagnostics);
+        Assert.Single(Result<string>.Failure((IEnumerable<CadDiagnostic>)[Error]).Diagnostics);
+    }
 }
