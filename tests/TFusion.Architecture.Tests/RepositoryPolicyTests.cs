@@ -110,7 +110,11 @@ public sealed partial class RepositoryPolicyTests
             {
                 foreach (var dependency in target.Value.EnumerateObject())
                 {
-                    dependencyNames.Add(dependency.Name);
+                    var type = dependency.Value.GetProperty("type").GetString();
+                    if (!string.Equals(type, "Project", StringComparison.Ordinal))
+                    {
+                        dependencyNames.Add(dependency.Name);
+                    }
                 }
             }
         }

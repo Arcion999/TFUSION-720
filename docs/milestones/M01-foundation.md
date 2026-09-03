@@ -44,7 +44,7 @@ M1-M01 through M1-M08 are **NOT EXECUTED**. They require a clean Windows 11 24H2
 - [ ] Coverage is at least 90% line and 85% branch.
 - [ ] Locked restore and deterministic Foundation output pass.
 - [ ] High/critical dependency audit is clean.
-- [ ] Locked third-party inventory has been reconciled.
+- [x] Locked third-party inventory has been reconciled.
 - [ ] `main` rules require PR/checks and prevent force-push/deletion.
 - [x] WPF shell contains no false CAD functionality.
 - [x] No unapproved architecture deviation exists.

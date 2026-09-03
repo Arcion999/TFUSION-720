@@ -18,25 +18,58 @@ TFUSION-720 itself is licensed under Apache License 2.0; see `LICENSE`.
 
 ## Resolved transitive dependencies
 
-The following families are brought in by the direct packages and use their upstream license files. Exact resolved versions and hashes are recorded in each project lock file.
+Exact resolved versions and content hashes are recorded in each project lock file. These identifiers are repeated explicitly so automated inventory checks cannot hide a newly resolved dependency behind a family name.
 
-- Microsoft.Extensions.Configuration and its Abstractions, Binder, CommandLine, EnvironmentVariables, FileExtensions, FileProviders, Ini, Json, and UserSecrets packages — MIT, dotnet/runtime
-- Microsoft.Extensions.DependencyInjection and Abstractions — MIT, dotnet/runtime
-- Microsoft.Extensions.Diagnostics and Abstractions — MIT, dotnet/runtime
-- Microsoft.Extensions.FileProviders.Abstractions and Physical — MIT, dotnet/runtime
-- Microsoft.Extensions.FileSystemGlobbing — MIT, dotnet/runtime
-- Microsoft.Extensions.Hosting.Abstractions — MIT, dotnet/runtime
-- Microsoft.Extensions.Logging and Abstractions, Configuration, Console, Debug, and EventSource — MIT, dotnet/runtime
-- Microsoft.Extensions.Options and ConfigurationExtensions — MIT, dotnet/runtime
-- Microsoft.Extensions.Primitives — MIT, dotnet/runtime
-- Microsoft.Testing.Extensions.Telemetry, TrxReport.Abstractions, VSTestBridge, and Microsoft.Testing.Platform — MIT, microsoft/testfx and microsoft/vstest
-- Microsoft.TestPlatform.ObjectModel and TestHost — MIT, microsoft/vstest
-- Microsoft.CodeCoverage — MIT, microsoft/vstest
-- Newtonsoft.Json — MIT, JamesNK/Newtonsoft.Json
-- Serilog.Extensions.Logging — Apache-2.0, serilog/serilog-extensions-logging
-- System.Diagnostics.DiagnosticSource — MIT, dotnet/runtime
-- System.Text.Encodings.Web and System.Text.Json — MIT, dotnet/runtime
-- xunit.abstractions — Apache-2.0, xunit/xunit
-- xunit.v3.assert, xunit.v3.common, xunit.v3.core, xunit.v3.extensibility.core, xunit.v3.runner.common, xunit.v3.runner.inproc.console, xunit.v3.runner.utility, and xunit.v3.runner.visualstudio.testadapter — Apache-2.0, xunit/xunit
+The following are MIT-licensed Microsoft packages from `dotnet/runtime`, `microsoft/vstest`, `microsoft/testfx`, or `microsoft/ApplicationInsights-dotnet` as applicable:
+
+- `Microsoft.ApplicationInsights`
+- `Microsoft.Bcl.AsyncInterfaces`
+- `Microsoft.CodeCoverage`
+- `Microsoft.Extensions.Configuration`
+- `Microsoft.Extensions.Configuration.Abstractions`
+- `Microsoft.Extensions.Configuration.Binder`
+- `Microsoft.Extensions.Configuration.CommandLine`
+- `Microsoft.Extensions.Configuration.EnvironmentVariables`
+- `Microsoft.Extensions.Configuration.FileExtensions`
+- `Microsoft.Extensions.Configuration.Json`
+- `Microsoft.Extensions.Configuration.UserSecrets`
+- `Microsoft.Extensions.DependencyInjection`
+- `Microsoft.Extensions.DependencyInjection.Abstractions`
+- `Microsoft.Extensions.Diagnostics`
+- `Microsoft.Extensions.Diagnostics.Abstractions`
+- `Microsoft.Extensions.FileProviders.Abstractions`
+- `Microsoft.Extensions.FileProviders.Physical`
+- `Microsoft.Extensions.FileSystemGlobbing`
+- `Microsoft.Extensions.Hosting.Abstractions`
+- `Microsoft.Extensions.Logging`
+- `Microsoft.Extensions.Logging.Abstractions`
+- `Microsoft.Extensions.Logging.Configuration`
+- `Microsoft.Extensions.Logging.Console`
+- `Microsoft.Extensions.Logging.Debug`
+- `Microsoft.Extensions.Logging.EventLog`
+- `Microsoft.Extensions.Logging.EventSource`
+- `Microsoft.Extensions.Options`
+- `Microsoft.Extensions.Options.ConfigurationExtensions`
+- `Microsoft.Extensions.Primitives`
+- `Microsoft.Testing.Extensions.Telemetry`
+- `Microsoft.Testing.Extensions.TrxReport.Abstractions`
+- `Microsoft.Testing.Platform`
+- `Microsoft.Testing.Platform.MSBuild`
+- `Microsoft.TestPlatform.ObjectModel`
+- `Microsoft.TestPlatform.TestHost`
+- `Microsoft.Win32.Registry`
+- `System.Security.AccessControl`
+
+The following are Apache-2.0-licensed Serilog/xUnit packages from their respective upstream repositories:
+
+- `Serilog.Extensions.Logging`
+- `xunit.analyzers`
+- `xunit.v3.assert`
+- `xunit.v3.common`
+- `xunit.v3.core.mtp-v2`
+- `xunit.v3.extensibility.core`
+- `xunit.v3.mtp-v2`
+- `xunit.v3.runner.common`
+- `xunit.v3.runner.inproc.console`
 
 Copyright notices and full license texts remain in their NuGet packages and upstream repositories. No third-party source code has been copied into this repository.
