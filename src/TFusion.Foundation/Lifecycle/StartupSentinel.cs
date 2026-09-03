@@ -6,7 +6,7 @@ namespace TFusion.Foundation.Lifecycle;
 
 public interface IAtomicTextWriter
 {
-    Result Write(string destinationPath, string content);
+    public Result Write(string destinationPath, string content);
 }
 
 public sealed record StartupObservation(
@@ -94,10 +94,10 @@ public sealed class StartupSentinel
         var writeResult = writer.Write(markerPath, JsonSerializer.Serialize(state, SerializerOptions));
         if (writeResult.IsFailure)
         {
-            return Result<StartupObservation>.Failure(writeResult.Diagnostics);
+            return Result.Failure<StartupObservation>(writeResult.Diagnostics);
         }
 
-        return Result<StartupObservation>.Success(
+        return Result.Success(
             new StartupObservation(previousWasUnclean, previousWasInvalid, sessionId),
             warnings);
     }

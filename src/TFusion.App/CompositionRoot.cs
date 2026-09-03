@@ -41,14 +41,14 @@ public sealed class CompositionRoot : IDisposable
         var pathsResult = ProductPaths.CreateDefault();
         if (pathsResult.IsFailure)
         {
-            return Result<CompositionRoot>.Failure(pathsResult.Diagnostics);
+            return Result.Failure<CompositionRoot>(pathsResult.Diagnostics);
         }
 
         var paths = pathsResult.Value;
         var createDirectoriesResult = paths.EnsureCreated();
         if (createDirectoriesResult.IsFailure)
         {
-            return Result<CompositionRoot>.Failure(createDirectoriesResult.Diagnostics);
+            return Result.Failure<CompositionRoot>(createDirectoriesResult.Diagnostics);
         }
 
         var sessionId = Guid.NewGuid();
@@ -79,7 +79,7 @@ public sealed class CompositionRoot : IDisposable
                 .ConfigureServices(services => services.AddSingleton<MainWindow>())
                 .Build();
 
-            return Result<CompositionRoot>.Success(new CompositionRoot(
+            return Result.Success(new CompositionRoot(
                 host,
                 paths,
                 new StartupSentinel(paths.StartupSentinelFile),
@@ -89,7 +89,7 @@ public sealed class CompositionRoot : IDisposable
         {
             Log.Fatal(exception, "Application composition failed");
             Log.CloseAndFlush();
-            return Result<CompositionRoot>.Failure(new CadDiagnostic(
+            return Result.Failure<CompositionRoot>(new CadDiagnostic(
                 FoundationDiagnosticCodes.InvalidConfiguration,
                 DiagnosticSeverity.Fatal,
                 "TFUSION-720 could not initialize.",

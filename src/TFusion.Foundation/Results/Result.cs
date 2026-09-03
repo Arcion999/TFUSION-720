@@ -28,6 +28,20 @@ public sealed class Result
     public static Result Failure(IEnumerable<CadDiagnostic> diagnostics) =>
         new(false, diagnostics);
 
+    public static Result<T> Success<T>(
+        T value,
+        IEnumerable<CadDiagnostic>? diagnostics = null)
+        where T : notnull =>
+        new(true, value, diagnostics ?? []);
+
+    public static Result<T> Failure<T>(params CadDiagnostic[] diagnostics)
+        where T : notnull =>
+        new(false, default, diagnostics);
+
+    public static Result<T> Failure<T>(IEnumerable<CadDiagnostic> diagnostics)
+        where T : notnull =>
+        new(false, default, diagnostics);
+
     private static void Validate(bool isSuccess, IReadOnlyCollection<CadDiagnostic> diagnostics)
     {
         ArgumentNullException.ThrowIfNull(diagnostics);

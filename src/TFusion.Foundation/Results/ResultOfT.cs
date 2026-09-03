@@ -7,7 +7,7 @@ public sealed class Result<T>
 {
     private readonly T? value;
 
-    private Result(bool isSuccess, T? value, IEnumerable<CadDiagnostic> diagnostics)
+    internal Result(bool isSuccess, T? value, IEnumerable<CadDiagnostic> diagnostics)
     {
         var diagnosticArray = diagnostics.ToArray();
 
@@ -49,12 +49,4 @@ public sealed class Result<T>
             ? value!
             : throw new InvalidOperationException("A failed result does not contain a value.");
 
-    public static Result<T> Success(T value, IEnumerable<CadDiagnostic>? diagnostics = null) =>
-        new(true, value, diagnostics ?? []);
-
-    public static Result<T> Failure(params CadDiagnostic[] diagnostics) =>
-        new(false, default, diagnostics);
-
-    public static Result<T> Failure(IEnumerable<CadDiagnostic> diagnostics) =>
-        new(false, default, diagnostics);
 }

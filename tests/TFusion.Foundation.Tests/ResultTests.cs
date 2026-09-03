@@ -27,15 +27,15 @@ public sealed class ResultTests
         Assert.Throws<ArgumentException>(() => Result.Success([Error]));
         Assert.Throws<ArgumentException>(() => Result.Failure(Warning));
         Assert.Throws<ArgumentException>(() => Result.Failure([]));
-        Assert.Throws<ArgumentException>(() => Result<string>.Success("value", [Error]));
-        Assert.Throws<ArgumentException>(() => Result<string>.Failure(Warning));
-        Assert.Throws<ArgumentNullException>(() => Result<string>.Success(null!));
+        Assert.Throws<ArgumentException>(() => Result.Success("value", [Error]));
+        Assert.Throws<ArgumentException>(() => Result.Failure<string>(Warning));
+        Assert.Throws<ArgumentNullException>(() => Result.Success<string>(null!));
     }
 
     [Fact]
     public void M1_U02_FailedGenericResultCannotExposeValue()
     {
-        var result = Result<string>.Failure(Error);
+        var result = Result.Failure<string>(Error);
 
         Assert.True(result.IsFailure);
         var exception = Assert.Throws<InvalidOperationException>(() => result.Value);
@@ -46,7 +46,7 @@ public sealed class ResultTests
     public void GenericSuccessExposesValueAndImmutableDiagnostics()
     {
         var source = new List<CadDiagnostic> { Warning };
-        var result = Result<string>.Success("value", source);
+        var result = Result.Success("value", source);
         source.Clear();
 
         Assert.True(result.IsSuccess);
@@ -58,6 +58,6 @@ public sealed class ResultTests
     public void EnumerableFailureFactoriesPreserveErrors()
     {
         Assert.Single(Result.Failure((IEnumerable<CadDiagnostic>)[Error]).Diagnostics);
-        Assert.Single(Result<string>.Failure((IEnumerable<CadDiagnostic>)[Error]).Diagnostics);
+        Assert.Single(Result.Failure<string>((IEnumerable<CadDiagnostic>)[Error]).Diagnostics);
     }
 }

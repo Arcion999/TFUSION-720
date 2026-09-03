@@ -33,7 +33,7 @@ public sealed class ProductPaths
 
         if (string.IsNullOrWhiteSpace(localApplicationData))
         {
-            return Result<ProductPaths>.Failure(new CadDiagnostic(
+            return Result.Failure<ProductPaths>(new CadDiagnostic(
                 FoundationDiagnosticCodes.StorageUnavailable,
                 DiagnosticSeverity.Error,
                 "Local application storage is unavailable.",
@@ -47,7 +47,7 @@ public sealed class ProductPaths
     {
         if (string.IsNullOrWhiteSpace(root))
         {
-            return Result<ProductPaths>.Failure(new CadDiagnostic(
+            return Result.Failure<ProductPaths>(new CadDiagnostic(
                 FoundationDiagnosticCodes.InvalidConfiguration,
                 DiagnosticSeverity.Error,
                 "The application storage path is invalid.",
@@ -56,14 +56,14 @@ public sealed class ProductPaths
 
         try
         {
-            return Result<ProductPaths>.Success(new ProductPaths(Path.GetFullPath(root)));
+            return Result.Success(new ProductPaths(Path.GetFullPath(root)));
         }
         catch (Exception exception) when (
             exception is ArgumentException
                 or NotSupportedException
                 or PathTooLongException)
         {
-            return Result<ProductPaths>.Failure(new CadDiagnostic(
+            return Result.Failure<ProductPaths>(new CadDiagnostic(
                 FoundationDiagnosticCodes.InvalidConfiguration,
                 DiagnosticSeverity.Error,
                 "The application storage path is invalid.",

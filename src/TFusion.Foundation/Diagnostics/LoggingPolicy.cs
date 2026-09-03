@@ -7,15 +7,8 @@ public sealed record LoggingPolicy
 
     public LoggingPolicy(long fileSizeLimitBytes, int retainedFileCountLimit)
     {
-        if (fileSizeLimitBytes <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(fileSizeLimitBytes));
-        }
-
-        if (retainedFileCountLimit <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(retainedFileCountLimit));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(fileSizeLimitBytes);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(retainedFileCountLimit);
 
         FileSizeLimitBytes = fileSizeLimitBytes;
         RetainedFileCountLimit = retainedFileCountLimit;
