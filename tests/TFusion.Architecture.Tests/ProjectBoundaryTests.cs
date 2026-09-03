@@ -5,7 +5,7 @@ namespace TFusion.Architecture.Tests;
 public sealed class ProjectBoundaryTests
 {
     [Fact]
-    public void M1_A01_SolutionContainsExactlyFiveMilestoneProjects()
+    public void M1A01SolutionContainsExactlyFiveMilestoneProjects()
     {
         var projects = RepositoryContext.Files("*.csproj", SearchOption.AllDirectories)
             .Select(path => Path.GetRelativePath(RepositoryContext.Root, path).Replace('\\', '/'))
@@ -26,7 +26,7 @@ public sealed class ProjectBoundaryTests
     }
 
     [Fact]
-    public void M1_A02_FoundationReferencesNoOtherTFusionAssembly()
+    public void M1A02FoundationReferencesNoOtherTFusionAssembly()
     {
         var project = LoadProject("src/TFusion.Foundation/TFusion.Foundation.csproj");
         Assert.Empty(project.Descendants("ProjectReference"));
@@ -34,7 +34,7 @@ public sealed class ProjectBoundaryTests
     }
 
     [Fact]
-    public void M1_A03_FoundationHasNoForbiddenFrameworkOrPackageReference()
+    public void M1A03FoundationHasNoForbiddenFrameworkOrPackageReference()
     {
         var combined = string.Join('\n', Directory.EnumerateFiles(
                 Path.Combine(RepositoryContext.Root, "src", "TFusion.Foundation"),
@@ -57,7 +57,7 @@ public sealed class ProjectBoundaryTests
     }
 
     [Fact]
-    public void M1_A04_ExecutableProjectsReferenceFoundationWithoutReverseReference()
+    public void M1A04ExecutableProjectsReferenceFoundationWithoutReverseReference()
     {
         AssertReferencesFoundation("src/TFusion.App/TFusion.App.csproj");
         AssertReferencesFoundation("src/TFusion.Diagnostics/TFusion.Diagnostics.csproj");
@@ -65,7 +65,7 @@ public sealed class ProjectBoundaryTests
     }
 
     [Fact]
-    public void M1_A05_NoNativeInteropDeclarationExists()
+    public void M1A05NoNativeInteropDeclarationExists()
     {
         var sources = ReadAllCSharp();
         Assert.DoesNotContain("[" + "DllImport(", sources, StringComparison.Ordinal);
@@ -73,7 +73,7 @@ public sealed class ProjectBoundaryTests
     }
 
     [Fact]
-    public void M1_A06_NoProjectEnablesUnsafeCode()
+    public void M1A06NoProjectEnablesUnsafeCode()
     {
         foreach (var projectPath in RepositoryContext.Files("*.csproj", SearchOption.AllDirectories))
         {

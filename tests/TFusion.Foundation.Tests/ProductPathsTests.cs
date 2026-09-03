@@ -10,7 +10,7 @@ public sealed class ProductPathsTests : IDisposable
         Guid.NewGuid().ToString("N"));
 
     [Fact]
-    public void M1_U05_OnlyCreatesExpectedDescendantsOfInjectedRoot()
+    public void M1U05OnlyCreatesExpectedDescendantsOfInjectedRoot()
     {
         var result = ProductPaths.FromRoot(testRoot);
         Assert.True(result.IsSuccess);
@@ -24,7 +24,7 @@ public sealed class ProductPathsTests : IDisposable
     }
 
     [Fact]
-    public void M1_U06_InvalidPathFailsWithoutCurrentDirectoryFallback()
+    public void M1U06InvalidPathFailsWithoutCurrentDirectoryFallback()
     {
         var originalCurrentDirectory = Environment.CurrentDirectory;
         var result = ProductPaths.FromRoot(" ");
@@ -35,7 +35,7 @@ public sealed class ProductPathsTests : IDisposable
     }
 
     [Fact]
-    public void M1_U06_PathUnderExistingFileReturnsControlledFailure()
+    public void M1U06PathUnderExistingFileReturnsControlledFailure()
     {
         Directory.CreateDirectory(testRoot);
         var blockingFile = Path.Combine(testRoot, "blocking-file");

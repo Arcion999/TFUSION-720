@@ -19,7 +19,7 @@ public sealed class StrongGuidTests
 
     [Theory]
     [MemberData(nameof(IdentifierTypes))]
-    public void M1_U04_EveryIdentifierRejectsEmptyAndRoundTripsInvariantText(Type identifierType)
+    public void M1U04EveryIdentifierRejectsEmptyAndRoundTripsInvariantText(Type identifierType)
     {
         var constructor = identifierType.GetConstructor([typeof(Guid)]);
         Assert.NotNull(constructor);
@@ -39,7 +39,7 @@ public sealed class StrongGuidTests
     }
 
     [Fact]
-    public void M1_U04_DistinctIdentifierWrappersAreNotAssignmentCompatible()
+    public void M1U04DistinctIdentifierWrappersAreNotAssignmentCompatible()
     {
         Assert.NotEqual(typeof(BodyId), typeof(FeatureId));
         Assert.False(typeof(BodyId).IsAssignableFrom(typeof(FeatureId)));
@@ -47,7 +47,7 @@ public sealed class StrongGuidTests
     }
 
     [Fact]
-    public void M1_U04_ParsingRequiresExactNonEmptyDFormat()
+    public void M1U04ParsingRequiresExactNonEmptyDFormat()
     {
         Assert.False(DocumentId.TryParse(null, out _));
         Assert.False(DocumentId.TryParse(Guid.Empty.ToString("D"), out _));
@@ -57,7 +57,7 @@ public sealed class StrongGuidTests
     }
 
     [Fact]
-    public void M1_U04_AllIdentifierTryParseAndNewPathsAreExercised()
+    public void M1U04AllIdentifierTryParseAndNewPathsAreExercised()
     {
         var text = Guid.NewGuid().ToString("D");
 

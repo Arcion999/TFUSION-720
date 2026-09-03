@@ -5,7 +5,7 @@ namespace TFusion.Foundation.Tests;
 public sealed class DiagnosticsTests
 {
     [Fact]
-    public void M1_U03_DiagnosticCopiesContextAndCausalOrder()
+    public void M1U03DiagnosticCopiesContextAndCausalOrder()
     {
         var context = new Dictionary<string, string>(StringComparer.Ordinal)
         {
@@ -46,13 +46,13 @@ public sealed class DiagnosticsTests
     [Theory]
     [InlineData(0, 1)]
     [InlineData(1, 0)]
-    public void M1_U12_LoggingPolicyRejectsUnboundedValues(long bytes, int files)
+    public void M1U12LoggingPolicyRejectsUnboundedValues(long bytes, int files)
     {
         Assert.ThrowsAny<ArgumentOutOfRangeException>(() => new LoggingPolicy(bytes, files));
     }
 
     [Fact]
-    public void M1_U12_DefaultLoggingPolicyIsExplicitlyBounded()
+    public void M1U12DefaultLoggingPolicyIsExplicitlyBounded()
     {
         Assert.Equal(10 * 1024 * 1024, LoggingPolicy.Default.FileSizeLimitBytes);
         Assert.Equal(14, LoggingPolicy.Default.RetainedFileCountLimit);

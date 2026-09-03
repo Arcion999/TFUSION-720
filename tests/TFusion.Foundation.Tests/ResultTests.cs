@@ -16,7 +16,7 @@ public sealed class ResultTests
         "Error");
 
     [Fact]
-    public void M1_U01_ResultFactoriesEnforceSuccessAndFailureInvariants()
+    public void M1U01ResultFactoriesEnforceSuccessAndFailureInvariants()
     {
         var success = Result.Success([Warning]);
         var failure = Result.Failure(Error);
@@ -33,7 +33,7 @@ public sealed class ResultTests
     }
 
     [Fact]
-    public void M1_U02_FailedGenericResultCannotExposeValue()
+    public void M1U02FailedGenericResultCannotExposeValue()
     {
         var result = Result.Failure<string>(Error);
 

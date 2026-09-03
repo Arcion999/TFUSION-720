@@ -1,12 +1,10 @@
 using System.Reflection.Emit;
-using TFusion.Foundation;
-
 namespace TFusion.Foundation.Tests;
 
 public sealed class BuildInfoTests
 {
     [Fact]
-    public void M1_U11_CurrentBuildInfoIsPresentAndParseable()
+    public void M1U11CurrentBuildInfoIsPresentAndParseable()
     {
         var buildInfo = BuildInfo.Current;
 
@@ -23,7 +21,7 @@ public sealed class BuildInfoTests
     [Fact]
     public void BuildInfoUsesSafeFallbacksWhenMetadataIsAbsent()
     {
-        var assemblyName = new AssemblyName("TFusion.MetadataFreeTestAssembly")
+        var assemblyName = new System.Reflection.AssemblyName("TFusion.MetadataFreeTestAssembly")
         {
             Version = null,
         };

@@ -15,7 +15,7 @@ public sealed class StartupSentinelTests : IDisposable
     private string MarkerPath => Path.Combine(testRoot, "Recovery", "startup-state.json");
 
     [Fact]
-    public void M1_U07_CleanStartAndStopRoundTripIsDetectedAsClean()
+    public void M1U07CleanStartAndStopRoundTripIsDetectedAsClean()
     {
         var firstSession = Guid.NewGuid();
         var sentinel = new StartupSentinel(MarkerPath);
@@ -31,7 +31,7 @@ public sealed class StartupSentinelTests : IDisposable
     }
 
     [Fact]
-    public void M1_U08_PreExistingUncleanMarkerIsReported()
+    public void M1U08PreExistingUncleanMarkerIsReported()
     {
         var sentinel = new StartupSentinel(MarkerPath);
         Assert.True(sentinel.BeginSession(Guid.NewGuid(), DateTimeOffset.UtcNow).IsSuccess);
@@ -43,7 +43,7 @@ public sealed class StartupSentinelTests : IDisposable
     }
 
     [Fact]
-    public void M1_U09_CorruptMarkerProducesDiagnosticAndSafeReset()
+    public void M1U09CorruptMarkerProducesDiagnosticAndSafeReset()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(MarkerPath)!);
         File.WriteAllText(MarkerPath, "{not-json");
@@ -60,7 +60,7 @@ public sealed class StartupSentinelTests : IDisposable
     }
 
     [Fact]
-    public void M1_U10_InjectedWriterFailurePreservesCompletePreviousMarker()
+    public void M1U10InjectedWriterFailurePreservesCompletePreviousMarker()
     {
         var sentinel = new StartupSentinel(MarkerPath);
         Assert.True(sentinel.BeginSession(Guid.NewGuid(), DateTimeOffset.UtcNow).IsSuccess);

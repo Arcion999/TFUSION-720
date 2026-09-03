@@ -8,7 +8,7 @@ namespace TFusion.Architecture.Tests;
 public sealed partial class RepositoryPolicyTests
 {
     [Fact]
-    public void M1_A07_PackageVersionsAreCentralExactLockedAndStable()
+    public void M1A07PackageVersionsAreCentralExactLockedAndStable()
     {
         var central = XDocument.Load(Path.Combine(RepositoryContext.Root, "Directory.Packages.props"));
         var versions = central.Descendants("PackageVersion").ToArray();
@@ -40,7 +40,7 @@ public sealed partial class RepositoryPolicyTests
     }
 
     [Fact]
-    public void M1_A08_AuthoritativeFilesMatchRecordedSha256Hashes()
+    public void M1A08AuthoritativeFilesMatchRecordedSha256Hashes()
     {
         var specificationDirectory = Path.Combine(RepositoryContext.Root, "docs", "specification");
         var manifestLines = File.ReadAllLines(Path.Combine(specificationDirectory, "SOURCES.sha256"));
@@ -57,7 +57,7 @@ public sealed partial class RepositoryPolicyTests
     }
 
     [Fact]
-    public void M1_A09_NoGeneratedOrUserLocalFileIsTracked()
+    public void M1A09NoGeneratedOrUserLocalFileIsTracked()
     {
         var forbiddenSegments = new[] { "bin/", "obj/", "artifacts/", "TestResults/", ".vs/" };
         var forbiddenExtensions = new[] { ".user", ".suo", ".dmp", ".log" };
@@ -73,7 +73,7 @@ public sealed partial class RepositoryPolicyTests
     }
 
     [Fact]
-    public void M1_A10_WorkflowActionsUseImmutableCommitPins()
+    public void M1A10WorkflowActionsUseImmutableCommitPins()
     {
         foreach (var workflowPath in RepositoryContext.Files("*.yml", SearchOption.AllDirectories)
                      .Where(path => path.Contains(
@@ -88,7 +88,7 @@ public sealed partial class RepositoryPolicyTests
     }
 
     [Fact]
-    public void M1_A11_ReadmeMakesNoSupportedCadCapabilityClaim()
+    public void M1A11ReadmeMakesNoSupportedCadCapabilityClaim()
     {
         var readme = RepositoryContext.Read("README.md");
         Assert.Contains("contains no CAD functionality", readme, StringComparison.OrdinalIgnoreCase);
@@ -98,7 +98,7 @@ public sealed partial class RepositoryPolicyTests
     }
 
     [Fact]
-    public void M1_A12_NoticesCoverEveryLockedDependency()
+    public void M1A12NoticesCoverEveryLockedDependency()
     {
         var notices = RepositoryContext.Read("THIRD_PARTY_NOTICES.md");
         var dependencyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -124,7 +124,7 @@ public sealed partial class RepositoryPolicyTests
     }
 
     [Fact]
-    public void M1_U12_AppLoggingIsBoundedLocalAndHasNoNetworkSink()
+    public void M1U12AppLoggingIsBoundedLocalAndHasNoNetworkSink()
     {
         var compositionRoot = RepositoryContext.Read("src/TFusion.App/CompositionRoot.cs");
         var appProject = RepositoryContext.Read("src/TFusion.App/TFusion.App.csproj");
