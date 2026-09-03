@@ -80,11 +80,14 @@ public sealed class CompositionRoot : IDisposable
                 .ConfigureServices(services => services.AddSingleton<MainWindow>())
                 .Build();
 
+            // Result<CompositionRoot> intentionally transfers dispose ownership to the caller.
+#pragma warning disable CA2000
             return Result.Success(new CompositionRoot(
                 host,
                 paths,
                 new StartupSentinel(paths.StartupSentinelFile),
                 sessionId));
+#pragma warning restore CA2000
         }
         catch (Exception exception)
         {
