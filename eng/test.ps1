@@ -16,20 +16,44 @@ $buildArgument = if ($NoBuild) { '--no-build' } else { $null }
 
 Push-Location $repositoryRoot
 try {
-    dotnet test $foundationTests --configuration Release $buildArgument `
-        --logger 'trx;LogFileName=foundation.trx' `
-        --results-directory $testResults `
-        --collect 'XPlat Code Coverage' `
-        -- 'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura' `
-        'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=[TFusion.Foundation]*'
+    $foundationArgs = @(
+        'test',
+        '--project', $foundationTests,
+        '--configuration', 'Release'
+    )
+    if ($buildArgument) {
+        $foundationArgs += $buildArgument
+    }
+    $foundationArgs += @(
+        '--results-directory', $testResults,
+        '--report-xunit-trx',
+        '--report-xunit-trx-filename', 'foundation.trx',
+        '--coverage',
+        '--coverage-output-format', 'cobertura',
+        '--coverage-output', 'foundation.coverage.cobertura.xml'
+    )
+
+    & dotnet @foundationArgs
     if ($LASTEXITCODE -ne 0) { throw 'Foundation tests failed.' }
 
-    dotnet test $architectureTests --configuration Release $buildArgument `
-        --logger 'trx;LogFileName=architecture.trx' `
-        --results-directory $testResults
+    $architectureArgs = @(
+        'test',
+        '--project', $architectureTests,
+        '--configuration', 'Release'
+    )
+    if ($buildArgument) {
+        $architectureArgs += $buildArgument
+    }
+    $architectureArgs += @(
+        '--results-directory', $testResults,
+        '--report-xunit-trx',
+        '--report-xunit-trx-filename', 'architecture.trx'
+    )
+
+    & dotnet @architectureArgs
     if ($LASTEXITCODE -ne 0) { throw 'Architecture tests failed.' }
 
-    $coverageFiles = @(Get-ChildItem -Path $testResults -Filter 'coverage.cobertura.xml' -Recurse)
+    $coverageFiles = @(Get-ChildItem -Path $testResults -Filter 'foundation.coverage.cobertura.xml' -Recurse)
     if ($coverageFiles.Count -ne 1) {
         throw "Expected exactly one Foundation coverage report; found $($coverageFiles.Count)."
     }
