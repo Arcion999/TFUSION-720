@@ -36,11 +36,10 @@ public sealed class ProjectBoundaryTests
     [Fact]
     public void M1A03FoundationHasNoForbiddenFrameworkOrPackageReference()
     {
-        var combined = string.Join('\n', Directory.EnumerateFiles(
-                Path.Combine(RepositoryContext.Root, "src", "TFusion.Foundation"),
-                "*",
-                SearchOption.AllDirectories)
-            .Where(path => Path.GetExtension(path) is ".cs" or ".csproj")
+        var foundationRoot = Path.Combine(RepositoryContext.Root, "src", "TFusion.Foundation");
+        var combined = string.Join('\n', RepositoryContext.Files("*", SearchOption.AllDirectories)
+            .Where(path => path.StartsWith(foundationRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                && Path.GetExtension(path) is ".cs" or ".csproj")
             .Select(File.ReadAllText));
         var forbidden = new[]
         {
