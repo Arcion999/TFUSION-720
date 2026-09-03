@@ -14,7 +14,7 @@ TFUSION-720 itself is licensed under Apache License 2.0; see `LICENSE`.
 | Serilog.Sinks.File | 7.0.0 | Apache-2.0 | serilog/serilog-sinks-file |
 | xunit.v3 | 4.0.0 | Apache-2.0 | xunit/xunit |
 | Microsoft.NET.Test.Sdk | 18.9.0 | MIT | microsoft/vstest |
-| coverlet.collector | 10.0.1 | MIT | coverlet-coverage/coverlet |
+| Microsoft.Testing.Extensions.CodeCoverage | 18.1.0 | Microsoft .NET Library license (free-to-use package terms) | microsoft/vstest / Microsoft testing platform code coverage |
 
 ## Resolved transitive dependencies
 
@@ -25,6 +25,7 @@ The following are MIT-licensed Microsoft packages from `dotnet/runtime`, `micros
 - `Microsoft.ApplicationInsights`
 - `Microsoft.Bcl.AsyncInterfaces`
 - `Microsoft.CodeCoverage`
+- `Microsoft.DiaSymReader`
 - `Microsoft.Extensions.Configuration`
 - `Microsoft.Extensions.Configuration.Abstractions`
 - `Microsoft.Extensions.Configuration.Binder`
@@ -35,6 +36,7 @@ The following are MIT-licensed Microsoft packages from `dotnet/runtime`, `micros
 - `Microsoft.Extensions.Configuration.UserSecrets`
 - `Microsoft.Extensions.DependencyInjection`
 - `Microsoft.Extensions.DependencyInjection.Abstractions`
+- `Microsoft.Extensions.DependencyModel`
 - `Microsoft.Extensions.Diagnostics`
 - `Microsoft.Extensions.Diagnostics.Abstractions`
 - `Microsoft.Extensions.FileProviders.Abstractions`
