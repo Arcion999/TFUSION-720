@@ -19,7 +19,8 @@ try {
     $foundationArgs = @(
         'test',
         '--project', $foundationTests,
-        '--configuration', 'Release'
+        '--configuration', 'Release',
+        '-p:Platform=x64'
     )
     if ($buildArgument) {
         $foundationArgs += $buildArgument
@@ -39,7 +40,8 @@ try {
     $architectureArgs = @(
         'test',
         '--project', $architectureTests,
-        '--configuration', 'Release'
+        '--configuration', 'Release',
+        '-p:Platform=x64'
     )
     if ($buildArgument) {
         $architectureArgs += $buildArgument
