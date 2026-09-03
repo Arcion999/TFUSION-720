@@ -18,7 +18,6 @@ public static class Program
             return 2;
         }
 
-        var command = new SelfTestCommand();
-        return command.Execute(Console.Out, Console.Error);
+        return SelfTestCommand.Execute(Console.Out, Console.Error);
     }
 }
