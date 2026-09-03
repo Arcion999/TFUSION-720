@@ -12,11 +12,11 @@ $foundationTests = Join-Path $repositoryRoot 'tests/TFusion.Foundation.Tests/TFu
 $architectureTests = Join-Path $repositoryRoot 'tests/TFusion.Architecture.Tests/TFusion.Architecture.Tests.csproj'
 
 New-Item -ItemType Directory -Force -Path $testResults | Out-Null
-$buildOption = if ($NoBuild) { @('--no-build') } else { @() }
+$buildArgument = if ($NoBuild) { '--no-build' } else { $null }
 
 Push-Location $repositoryRoot
 try {
-    dotnet test $foundationTests --configuration Release @buildOption `
+    dotnet test $foundationTests --configuration Release $buildArgument `
         --logger 'trx;LogFileName=foundation.trx' `
         --results-directory $testResults `
         --collect 'XPlat Code Coverage' `
@@ -24,7 +24,7 @@ try {
         'DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=[TFusion.Foundation]*'
     if ($LASTEXITCODE -ne 0) { throw 'Foundation tests failed.' }
 
-    dotnet test $architectureTests --configuration Release @buildOption `
+    dotnet test $architectureTests --configuration Release $buildArgument `
         --logger 'trx;LogFileName=architecture.trx' `
         --results-directory $testResults
     if ($LASTEXITCODE -ne 0) { throw 'Architecture tests failed.' }
