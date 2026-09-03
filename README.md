@@ -1,6 +1,6 @@
 # TFUSION-720
 
-TFUSION-720 is a precision-oriented, offline-first Windows 3D CAD engineering project. It is **pre-alpha**. Milestone 1 contains no CAD functionality and makes no geometry, modelling, rendering, manufacturing, import, export, or file-format support claim.
+TFUSION-720 is a precision-oriented, offline-first Windows 3D CAD engineering project. It is **pre-alpha**. Milestone 1 contains no CAD functionality and makes no geometry, modelling, rendering, manufacturing, import, export, or file-format support claim. There is **no file-format support** in Milestone 1.
 
 The present executable is deliberately limited to an honest engineering-foundation window. It has no modelling controls. Exact CAD behavior begins only after each preceding milestone has passed its mandatory gate.
 
