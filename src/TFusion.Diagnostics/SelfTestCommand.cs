@@ -13,7 +13,7 @@ public sealed class SelfTestCommand
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
-    public int Execute(TextWriter standardOutput, TextWriter standardError)
+    public static int Execute(TextWriter standardOutput, TextWriter standardError)
     {
         ArgumentNullException.ThrowIfNull(standardOutput);
         ArgumentNullException.ThrowIfNull(standardError);
