@@ -79,6 +79,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $false
           $executable = Get-ChildItem ./src/TFusion.Diagnostics/bin/x64/Release -Filter TFusion.Diagnostics.exe -Recurse | Select-Object -First 1
           if ($null -eq $executable) { throw 'Diagnostics executable was not produced.' }
 
@@ -88,7 +89,8 @@ jobs:
           if ($success.status -ne 'pass') { throw 'Diagnostics self-test did not report pass.' }
 
           $invalidJson = & $executable.FullName --invalid
-          if ($LASTEXITCODE -eq 0) { throw 'Invalid diagnostics arguments returned success.' }
+          $invalidExitCode = $LASTEXITCODE
+          if ($invalidExitCode -eq 0) { throw 'Invalid diagnostics arguments returned success.' }
           $invalid = $invalidJson | ConvertFrom-Json
           if ($invalid.code -ne 'TFN-DIAG-INVALID-ARGUMENTS') { throw 'Invalid argument response code was wrong.' }
 
