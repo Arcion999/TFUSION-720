@@ -40,8 +40,8 @@ jobs:
 
       - name: Build portable projects
         run: |
-          dotnet build tests/TFusion.Foundation.Tests/TFusion.Foundation.Tests.csproj --configuration Release --no-restore
-          dotnet build tests/TFusion.Architecture.Tests/TFusion.Architecture.Tests.csproj --configuration Release --no-restore
+          dotnet build tests/TFusion.Foundation.Tests/TFusion.Foundation.Tests.csproj --configuration Release --no-restore --property:Platform=x64
+          dotnet build tests/TFusion.Architecture.Tests/TFusion.Architecture.Tests.csproj --configuration Release --no-restore --property:Platform=x64
 
       - name: Test portable projects and coverage
         shell: pwsh
