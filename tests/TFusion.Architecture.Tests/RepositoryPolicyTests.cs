@@ -132,7 +132,7 @@ public sealed partial class RepositoryPolicyTests
         Assert.Contains("WriteTo.File", compositionRoot, StringComparison.Ordinal);
         Assert.Contains("fileSizeLimitBytes: policy.FileSizeLimitBytes", compositionRoot, StringComparison.Ordinal);
         Assert.Contains("retainedFileCountLimit: policy.RetainedFileCountLimit", compositionRoot, StringComparison.Ordinal);
-        Assert.Contains("Paths.Logs", compositionRoot, StringComparison.Ordinal);
+        Assert.Contains("Path.Combine(paths.Logs", compositionRoot, StringComparison.Ordinal);
         Assert.DoesNotContain("WriteTo.Http", compositionRoot, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("WriteTo.Seq", compositionRoot, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("http", appProject, StringComparison.OrdinalIgnoreCase);
