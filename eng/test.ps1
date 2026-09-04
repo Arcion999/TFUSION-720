@@ -10,6 +10,7 @@ $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $testResults = Join-Path $repositoryRoot 'artifacts/test-results'
 $foundationTests = Join-Path $repositoryRoot 'tests/TFusion.Foundation.Tests/TFusion.Foundation.Tests.csproj'
 $architectureTests = Join-Path $repositoryRoot 'tests/TFusion.Architecture.Tests/TFusion.Architecture.Tests.csproj'
+$kernelTests = Join-Path $repositoryRoot 'tests/TFusion.Kernel.Tests/TFusion.Kernel.Tests.csproj'
 
 New-Item -ItemType Directory -Force -Path $testResults | Out-Null
 $buildArgument = if ($NoBuild) { '--no-build' } else { $null }
@@ -54,6 +55,26 @@ try {
 
     & dotnet @architectureArgs
     if ($LASTEXITCODE -ne 0) { throw 'Architecture tests failed.' }
+
+    if ($IsWindows) {
+        $kernelArgs = @(
+            'test',
+            '--project', $kernelTests,
+            '--configuration', 'Release',
+            '-p:Platform=x64'
+        )
+        if ($buildArgument) {
+            $kernelArgs += $buildArgument
+        }
+        $kernelArgs += @(
+            '--results-directory', $testResults,
+            '--report-xunit-trx',
+            '--report-xunit-trx-filename', 'kernel.trx'
+        )
+
+        & dotnet @kernelArgs
+        if ($LASTEXITCODE -ne 0) { throw 'Managed kernel interop tests failed.' }
+    }
 
     $coverageFiles = @(Get-ChildItem -Path $testResults -Filter 'foundation.coverage.cobertura.xml' -Recurse)
     if ($coverageFiles.Count -ne 1) {

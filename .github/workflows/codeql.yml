@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - milestone/01-foundation
+      - milestone/02-occt-native-bridge
   pull_request:
     branches:
       - main
@@ -46,3 +47,33 @@ jobs:
         uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           category: /language:csharp
+
+  codeql-cpp:
+    name: codeql-cpp
+    runs-on: windows-2025
+    timeout-minutes: 120
+    env:
+      TFUSION_VCPKG_BINARY_CACHE: ${{ runner.temp }}\vcpkg-binary-cache
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Restore native binary cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ runner.temp }}\vcpkg-binary-cache
+          key: vcpkg-x64-windows-${{ hashFiles('native/TFusion.Kernel.Native/vcpkg.json') }}
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        with:
+          languages: cpp
+
+      - name: Build native bridge
+        shell: pwsh
+        run: ./eng/native-build.ps1 -SkipTests -SkipInstall
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        with:
+          category: /language:cpp

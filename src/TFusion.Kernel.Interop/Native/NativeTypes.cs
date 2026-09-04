@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace TFusion.Kernel.Interop.Native;
 
-internal enum NativeStatus : uint
+internal enum NativeStatus
 {
     Success = 0,
     InvalidArgument = 1,

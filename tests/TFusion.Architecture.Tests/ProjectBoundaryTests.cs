@@ -5,7 +5,7 @@ namespace TFusion.Architecture.Tests;
 public sealed class ProjectBoundaryTests
 {
     [Fact]
-    public void M1A01SolutionContainsExactlyFiveMilestoneProjects()
+    public void M2A01SolutionContainsTheApprovedManagedProjects()
     {
         var projects = RepositoryContext.Files("*.csproj", SearchOption.AllDirectories)
             .Select(path => Path.GetRelativePath(RepositoryContext.Root, path).Replace('\\', '/'))
@@ -17,12 +17,14 @@ public sealed class ProjectBoundaryTests
             "src/TFusion.App/TFusion.App.csproj",
             "src/TFusion.Diagnostics/TFusion.Diagnostics.csproj",
             "src/TFusion.Foundation/TFusion.Foundation.csproj",
+            "src/TFusion.Kernel.Interop/TFusion.Kernel.Interop.csproj",
             "tests/TFusion.Architecture.Tests/TFusion.Architecture.Tests.csproj",
             "tests/TFusion.Foundation.Tests/TFusion.Foundation.Tests.csproj",
+            "tests/TFusion.Kernel.Tests/TFusion.Kernel.Tests.csproj",
         ], projects);
 
         var solution = RepositoryContext.Read("TFUSION-720.sln");
-        Assert.Equal(5, solution.Split('\n').Count(line => line.StartsWith("Project(\"", StringComparison.Ordinal)));
+        Assert.Equal(7, solution.Split('\n').Count(line => line.StartsWith("Project(\"", StringComparison.Ordinal)));
     }
 
     [Fact]
@@ -60,15 +62,36 @@ public sealed class ProjectBoundaryTests
     {
         AssertReferencesFoundation("src/TFusion.App/TFusion.App.csproj");
         AssertReferencesFoundation("src/TFusion.Diagnostics/TFusion.Diagnostics.csproj");
+        AssertReferencesFoundation("src/TFusion.Kernel.Interop/TFusion.Kernel.Interop.csproj");
         Assert.Empty(LoadProject("src/TFusion.Foundation/TFusion.Foundation.csproj").Descendants("ProjectReference"));
     }
 
     [Fact]
-    public void M1A05NoNativeInteropDeclarationExists()
+    public void M2A02NativeImportsExistOnlyInTheDedicatedInteropAssembly()
+    {
+        var interopRoot = Path.Combine(RepositoryContext.Root, "src", "TFusion.Kernel.Interop");
+        var filesWithImports = RepositoryContext.Files("*.cs", SearchOption.AllDirectories)
+            .Where(path => File.ReadAllText(path).Contains("[" + "DllImport(", StringComparison.Ordinal))
+            .ToArray();
+
+        Assert.NotEmpty(filesWithImports);
+        Assert.All(filesWithImports, path => Assert.StartsWith(
+            interopRoot + Path.DirectorySeparatorChar,
+            path,
+            StringComparison.Ordinal));
+        Assert.DoesNotContain("[" + "LibraryImport(", ReadAllCSharp(), StringComparison.Ordinal);
+
+        var nativeMethods = RepositoryContext.Read("src/TFusion.Kernel.Interop/Native/NativeMethods.cs");
+        Assert.Contains("CallingConvention = CallingConvention.Cdecl", nativeMethods, StringComparison.Ordinal);
+        Assert.Contains("ExactSpelling = true", nativeMethods, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void M2A03ManagedCodeDoesNotExposeOcctCppTypes()
     {
         var sources = ReadAllCSharp();
-        Assert.DoesNotContain("[" + "DllImport(", sources, StringComparison.Ordinal);
-        Assert.DoesNotContain("[" + "LibraryImport(", sources, StringComparison.Ordinal);
+        var forbidden = new[] { "TopoDS_", "Handle(Geom", "Standard_Transient", "opencascade::" };
+        Assert.All(forbidden, value => Assert.DoesNotContain(value, sources, StringComparison.Ordinal));
     }
 
     [Fact]

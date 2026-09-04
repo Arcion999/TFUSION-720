@@ -28,4 +28,16 @@
       DestinationFiles="@(_TFusionNativeRuntime->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')"
       SkipUnchangedFiles="true" />
   </Target>
+
+  <Target
+    Name="TFusionIncludeNativeRuntimeInPublish"
+    BeforeTargets="ComputeFilesToPublish"
+    Condition="$([System.String]::Copy('$(TargetFramework)').Contains('-windows')) and Exists('$(MSBuildThisFileDirectory)artifacts/native/package')">
+    <ItemGroup>
+      <ResolvedFileToPublish Include="$(MSBuildThisFileDirectory)artifacts/native/package/**/*">
+        <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 </Project>
