@@ -89,7 +89,10 @@ public sealed class ProjectBoundaryTests
     [Fact]
     public void M2A03ManagedCodeDoesNotExposeOcctCppTypes()
     {
-        var sources = ReadAllCSharp();
+        var sourceRoot = Path.Combine(RepositoryContext.Root, "src");
+        var sources = string.Join('\n', RepositoryContext.Files("*.cs", SearchOption.AllDirectories)
+            .Where(path => path.StartsWith(sourceRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            .Select(File.ReadAllText));
         var forbidden = new[] { "TopoDS_", "Handle(Geom", "Standard_Transient", "opencascade::" };
         Assert.All(forbidden, value => Assert.DoesNotContain(value, sources, StringComparison.Ordinal));
     }

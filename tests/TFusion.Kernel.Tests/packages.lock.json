@@ -158,6 +158,12 @@
         }
       },
       "tfusion.kernel.interop": {
+        "type": "Project",
+        "dependencies": {
+          "TFusion.Foundation": "[1.0.0, )"
+        }
+      },
+      "tfusion.foundation": {
         "type": "Project"
       }
     },

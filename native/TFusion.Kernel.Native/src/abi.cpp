@@ -19,6 +19,10 @@ using tfusion::HandleRegistry;
 using tfusion::KernelContext;
 using tfusion::RuntimeProbe;
 
+static_assert(sizeof(TFusionContextCreateInfo) == 32U);
+static_assert(sizeof(TFusionKernelInfo) == 24U);
+static_assert(sizeof(TFusionAllocationSnapshot) == 40U);
+
 TFusionStatus validate_context(
     const TFusionHandle handle,
     std::shared_ptr<KernelContext>& context,

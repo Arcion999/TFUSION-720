@@ -66,12 +66,19 @@ void test_abi()
 
 void test_context_and_occt()
 {
+    TFusionHandle rejectedHandle = UINT64_C(0xFFFFFFFFFFFFFFFF);
+    require(
+        tfusion_context_create(nullptr, &rejectedHandle) == TFUSION_STATUS_INVALID_ARGUMENT,
+        "Null context create info was accepted.");
+    require(rejectedHandle == 0U, "Rejected context creation did not clear its output handle.");
+
     const auto context = create_context(u8"TFUSION — blå");
     TFusionKernelInfo info{
         sizeof(TFusionKernelInfo),
         TFUSION_KERNEL_INFO_VERSION,
         0U, 0U, 0U, 0U};
     require(tfusion_context_get_kernel_info(context, &info) == TFUSION_STATUS_SUCCESS, "Kernel info failed.");
+    require(tfusion_context_get_kernel_info(context, nullptr) == TFUSION_STATUS_INVALID_ARGUMENT, "Null kernel info was accepted.");
     require(info.abiVersion == 1U, "Kernel info ABI was wrong.");
     require(info.architecture == TFUSION_ARCHITECTURE_X64, "Kernel architecture was not x64.");
 
@@ -83,6 +90,10 @@ void test_context_and_occt()
     require(info.runtimeOcctVersionRequiredBytes == runtime.size() + 1U, "Runtime version size metadata was wrong.");
 
     require(get_text(context, TFUSION_TEXT_CONTEXT_CLIENT_NAME) == u8"TFUSION — blå", "Unicode client name did not round-trip.");
+    require(
+        tfusion_context_get_text_utf8(context, TFUSION_TEXT_CONTEXT_CLIENT_NAME, nullptr, 0U, nullptr)
+            == TFUSION_STATUS_INVALID_ARGUMENT,
+        "Null required-size output was accepted.");
 
     std::array<char, 2> shortBuffer{'x', 'x'};
     std::uint32_t required = 0U;
@@ -110,6 +121,7 @@ void test_handles()
     const auto contextA = create_context("context-a");
     const auto contextB = create_context("context-b");
     TFusionHandle probe = 0U;
+    require(tfusion_probe_create(contextA, nullptr) == TFUSION_STATUS_INVALID_ARGUMENT, "Null probe output was accepted.");
     require(tfusion_probe_create(contextA, &probe) == TFUSION_STATUS_SUCCESS, "Probe creation failed.");
     require(tfusion_context_destroy(probe) == TFUSION_STATUS_TYPE_MISMATCH, "Wrong handle type was accepted.");
 
@@ -121,6 +133,9 @@ void test_handles()
     require(tfusion_probe_release(contextB, probe) == TFUSION_STATUS_CONTEXT_MISMATCH, "Cross-context probe release was accepted.");
     require(tfusion_probe_release(contextA, probe) == TFUSION_STATUS_SUCCESS, "Probe release failed.");
     require(tfusion_probe_release(contextA, probe) == TFUSION_STATUS_STALE_HANDLE, "Double probe release was not stale.");
+    require(
+        tfusion_probe_release(contextA, UINT64_C(0x0765432189ABCDEF)) == TFUSION_STATUS_INVALID_HANDLE,
+        "Random probe handle was accepted.");
 
     TFusionHandle cleanupProbe = 0U;
     require(tfusion_probe_create(contextA, &cleanupProbe) == TFUSION_STATUS_SUCCESS, "Cleanup probe creation failed.");

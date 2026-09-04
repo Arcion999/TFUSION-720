@@ -1,6 +1,7 @@
 #include "diagnostic.hpp"
 
 #include "handle_registry.hpp"
+#include "utf8.hpp"
 
 #include <cstdio>
 #include <memory>
@@ -78,13 +79,20 @@ std::string make_json(
     const std::string_view nativeDetail)
 {
     std::ostringstream output;
+    const auto* const nativeBytes = reinterpret_cast<const std::uint8_t*>(nativeDetail.data());
+    const auto safeNativeDetail = tfusion::is_valid_utf8(
+        nativeBytes,
+        nativeDetail.size() <= UINT32_MAX ? static_cast<std::uint32_t>(nativeDetail.size()) : UINT32_MAX)
+        ? nativeDetail
+        : std::string_view("Native detail was not valid bounded UTF-8.");
+
     output << "{\"status\":\"" << status_name(status)
         << "\",\"code\":\"" << stable_code(status)
         << "\",\"severity\":\"error\""
         << ",\"userMessage\":\"" << escape_json(userMessage)
         << "\",\"technicalMessage\":\"" << escape_json(technicalMessage)
         << "\",\"operation\":\"" << escape_json(operation)
-        << "\",\"nativeDetail\":\"" << escape_json(nativeDetail)
+        << "\",\"nativeDetail\":\"" << escape_json(safeNativeDetail)
         << "\"}";
     return output.str();
 }

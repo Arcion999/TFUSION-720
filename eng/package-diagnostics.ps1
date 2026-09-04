@@ -45,6 +45,31 @@ try {
     }
 
     $json | Out-File -LiteralPath (Join-Path $repositoryRoot 'artifacts/diagnostics-package-test.json') -Encoding utf8NoBOM
+
+    $missingBridgePackage = Join-Path $workingDirectory 'missing-bridge-package'
+    New-Item -ItemType Directory -Path $missingBridgePackage | Out-Null
+    foreach ($item in Get-ChildItem -LiteralPath $packageRoot -Force) {
+        if ($item.Name -notin @('TFusion.Kernel.Native.dll', 'TKernel.dll')) {
+            Copy-Item -LiteralPath $item.FullName -Destination $missingBridgePackage -Recurse
+        }
+    }
+
+    $failureOutput = Join-Path $workingDirectory 'missing-bridge-output.json'
+    $failureProcess = Start-Process `
+        -FilePath (Join-Path $missingBridgePackage 'TFusion.Diagnostics.exe') `
+        -ArgumentList '--self-test', '--format', 'json' `
+        -NoNewWindow -Wait -PassThru -RedirectStandardOutput $failureOutput
+    $failureJson = Get-Content -LiteralPath $failureOutput -Raw
+    if ($failureProcess.ExitCode -eq 0) { throw 'Diagnostics returned success when its native bridge was absent.' }
+    $failureReport = $failureJson | ConvertFrom-Json
+    if ($failureReport.status -ne 'fail'
+        -or $failureReport.nativeKernel.loadStatus -ne 'load-failed'
+        -or $failureReport.nativeKernel.diagnosticCode -ne 'TFN-KRN-LOAD') {
+        throw "Missing-bridge diagnostics were not structured correctly: $failureJson"
+    }
+    $failureJson | Out-File `
+        -LiteralPath (Join-Path $repositoryRoot 'artifacts/diagnostics-missing-bridge-test.json') `
+        -Encoding utf8NoBOM
 }
 finally {
     $env:PATH = $originalPath

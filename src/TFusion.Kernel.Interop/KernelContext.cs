@@ -70,7 +70,9 @@ public sealed class KernelContext : IDisposable
                     nameof(Create)));
             }
 
+#pragma warning disable CA2000 // Ownership is intentionally transferred through successful Result<T>.
             return Result.Success(new KernelContext(SafeKernelContextHandle.Create(nativeHandle)));
+#pragma warning restore CA2000
         }
         catch (Exception exception) when (KernelDiagnosticFactory.IsInteropException(exception))
         {
@@ -88,6 +90,18 @@ public sealed class KernelContext : IDisposable
     public Result<KernelBridgeInfo> GetBridgeInfo()
     {
         ThrowIfDisposed();
+        try
+        {
+            return GetBridgeInfoCore();
+        }
+        catch (Exception exception) when (KernelDiagnosticFactory.IsInteropException(exception))
+        {
+            return Result.Failure<KernelBridgeInfo>(KernelDiagnosticFactory.LoadFailure(exception));
+        }
+    }
+
+    private Result<KernelBridgeInfo> GetBridgeInfoCore()
+    {
         var info = new NativeKernelInfo
         {
             StructSize = checked((uint)Marshal.SizeOf<NativeKernelInfo>()),
@@ -145,40 +159,75 @@ public sealed class KernelContext : IDisposable
                 "The UTF-8 client name exceeds the ABI v1 limit of 4096 bytes."));
         }
 
-        var status = NativeMethods.ContextSetClientNameUtf8(
-            NativeHandle,
-            bytes.Length == 0 ? null : bytes,
-            checked((uint)bytes.Length));
-        return status == NativeStatus.Success
-            ? Result.Success()
-            : Result.Failure(KernelDiagnosticFactory.FromStatus(status, NativeHandle, nameof(SetClientName)));
+        try
+        {
+            var status = NativeMethods.ContextSetClientNameUtf8(
+                NativeHandle,
+                bytes.Length == 0 ? null : bytes,
+                checked((uint)bytes.Length));
+            return status == NativeStatus.Success
+                ? Result.Success()
+                : Result.Failure(KernelDiagnosticFactory.FromStatus(status, NativeHandle, nameof(SetClientName)));
+        }
+        catch (Exception exception) when (KernelDiagnosticFactory.IsInteropException(exception))
+        {
+            return Result.Failure(KernelDiagnosticFactory.LoadFailure(exception));
+        }
     }
 
     public Result<string> GetClientName()
     {
         ThrowIfDisposed();
-        return ReadText(NativeTextField.ContextClientName);
+        try
+        {
+            return ReadText(NativeTextField.ContextClientName);
+        }
+        catch (Exception exception) when (KernelDiagnosticFactory.IsInteropException(exception))
+        {
+            return Result.Failure<string>(KernelDiagnosticFactory.LoadFailure(exception));
+        }
     }
 
     public Result<KernelRuntimeProbe> CreateRuntimeProbe()
     {
         ThrowIfDisposed();
+        try
+        {
+            return CreateRuntimeProbeCore();
+        }
+        catch (Exception exception) when (KernelDiagnosticFactory.IsInteropException(exception))
+        {
+            return Result.Failure<KernelRuntimeProbe>(KernelDiagnosticFactory.LoadFailure(exception));
+        }
+    }
+
+    private Result<KernelRuntimeProbe> CreateRuntimeProbeCore()
+    {
         var status = NativeMethods.ProbeCreate(NativeHandle, out var probeHandle);
+#pragma warning disable CA2000 // Ownership is intentionally transferred through successful Result<T>.
         return status == NativeStatus.Success && probeHandle != 0
             ? Result.Success(new KernelRuntimeProbe(SafeKernelProbeHandle.Create(handle, probeHandle), this))
             : Result.Failure<KernelRuntimeProbe>(KernelDiagnosticFactory.FromStatus(
                 status == NativeStatus.Success ? NativeStatus.InternalError : status,
                 NativeHandle,
                 nameof(CreateRuntimeProbe)));
+#pragma warning restore CA2000
     }
 
     internal Result ExerciseExceptionBoundary(NativeExceptionProbe probe)
     {
         ThrowIfDisposed();
-        var status = NativeMethods.TestExceptionBoundary(NativeHandle, probe);
-        return status == NativeStatus.Success
-            ? Result.Success()
-            : Result.Failure(KernelDiagnosticFactory.FromStatus(status, NativeHandle, nameof(ExerciseExceptionBoundary)));
+        try
+        {
+            var status = NativeMethods.TestExceptionBoundary(NativeHandle, probe);
+            return status == NativeStatus.Success
+                ? Result.Success()
+                : Result.Failure(KernelDiagnosticFactory.FromStatus(status, NativeHandle, nameof(ExerciseExceptionBoundary)));
+        }
+        catch (Exception exception) when (KernelDiagnosticFactory.IsInteropException(exception))
+        {
+            return Result.Failure(KernelDiagnosticFactory.LoadFailure(exception));
+        }
     }
 
     internal Result<string> ReadText(NativeTextField field)

@@ -37,8 +37,15 @@ internal sealed class SafeKernelProbeHandle : SafeHandleZeroOrMinusOneIsInvalid
                 return false;
             }
 
-            var status = NativeMethods.ProbeRelease(owner.Value, unchecked((ulong)handle.ToInt64()));
-            return status is NativeStatus.Success or NativeStatus.StaleHandle;
+            try
+            {
+                var status = NativeMethods.ProbeRelease(owner.Value, unchecked((ulong)handle.ToInt64()));
+                return status is NativeStatus.Success or NativeStatus.StaleHandle;
+            }
+            catch (Exception exception) when (KernelDiagnosticFactory.IsInteropException(exception))
+            {
+                return false;
+            }
         }
         finally
         {
