@@ -1,26 +1,53 @@
 # TFUSION-720
 
-TFUSION-720 is a pre-alpha engineering project for a precision-oriented,
-offline Windows 3D CAD application.
+TFUSION-720 is a precision-oriented, offline-first Windows 3D CAD engineering project. It is **pre-alpha**. Milestone 1 contains no CAD functionality and makes no geometry, modelling, rendering, manufacturing, import, export, or file-format support claim. There is **no file-format support** in Milestone 1.
 
-The repository is currently implementing **Milestone 1: Repository and
-Engineering Foundation**. No CAD geometry, viewport, modelling command, or
-file-format support exists yet.
+The present executable is deliberately limited to an honest engineering-foundation window. It has no modelling controls. Exact CAD behavior begins only after each preceding milestone has passed its mandatory gate.
 
-The authoritative requirements are:
+## Engineering priorities
 
-- [Definitive Milestone Roadmap](docs/specification/TFUSION-720_Definitive_Milestone_Roadmap.md)
-- [Master Implementation Directive](docs/specification/MASTER_IMPLEMENTATION_DIRECTIVE.md)
-- [Deep Research Report](docs/specification/DEEP_RESEARCH_REPORT.md)
+Work is governed, in order, by user data safety, geometric correctness, numerical robustness, document integrity, stability, parametric reliability, import/export reliability, manufacturing validity, UI responsiveness, performance, usability, visual polish, advanced features, and feature count.
 
-Milestone 1 targets .NET 10, C# 14, WPF, and Windows 11 24H2+ x64. See the
-roadmap and architecture decision records before making implementation
-decisions.
+The authoritative architecture requires C#/.NET and WPF, a narrow native C ABI to Open CASCADE Technology, exact B-Rep/NURBS geometry separate from disposable rendering meshes, Direct3D through Vortice.Windows, a parametric history, a dedicated sketch solver, modular exchange providers, a versioned native format, and transactional modelling. Those later systems are not present in Milestone 1.
 
-## Status
+## Current milestone
 
-Engineering foundation only — CAD tools are not implemented yet.
+Milestone 1 — repository and engineering foundation. Status: **PARTIAL until CI and all recorded Windows 11 manual checks pass**. See [the milestone report](docs/milestones/M01-foundation.md).
 
-## License
+## Supported development baseline
 
-Licensed under the [Apache License 2.0](LICENSE).
+- Windows 11 24H2 or newer, x64
+- .NET SDK 10.0.400 (selected by `global.json`)
+- PowerShell 7
+- Visual Studio 2026 with **.NET desktop development**; **Desktop development with C++** is required beginning in Milestone 2, not by current C++ code
+
+No network connection is required for normal application startup. A first restore requires access to the configured NuGet source.
+
+## Build and test
+
+From PowerShell 7 at the repository root:
+
+```powershell
+./eng/build.ps1
+./eng/test.ps1 -NoBuild
+./eng/verify.ps1
+```
+
+`verify.ps1` is the complete Milestone 1 automated gate: format verification, locked restore, Release x64 build, tests and coverage thresholds, dependency audit, and deterministic Foundation assembly comparison.
+
+Run the machine-readable local diagnostic after building:
+
+```powershell
+./src/TFusion.Diagnostics/bin/x64/Release/net10.0-windows10.0.26100.0/win-x64/TFusion.Diagnostics.exe --self-test --format json
+```
+
+## Project documents
+
+- [Authoritative specifications](docs/specification/)
+- [Architecture decisions](docs/architecture/)
+- [Milestone evidence](docs/milestones/)
+- [Contributing](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Third-party notices](THIRD_PARTY_NOTICES.md)
+
+The long-term product goal is entirely local CAD operation. Cloud accounts, telemetry, and proprietary format SDKs are not core dependencies.

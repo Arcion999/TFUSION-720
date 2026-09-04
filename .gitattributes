@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+*.sln text eol=crlf
+*.ps1 text eol=crlf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.brep binary
+
+docs/specification/TFUSION-720_Definitive_Milestone_Roadmap.md -text
+docs/specification/MASTER_IMPLEMENTATION_DIRECTIVE.md -text
+docs/specification/DEEP_RESEARCH_REPORT.md -text

@@ -1,0 +1,106 @@
+name: Milestone 1 CI
+
+on:
+  push:
+    branches:
+      - main
+      - milestone/01-foundation
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUGET_XMLDOC_MODE: skip
+
+jobs:
+  managed-core:
+    name: managed-core
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.400
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+
+      - name: Locked restore
+        run: |
+          dotnet restore tests/TFusion.Foundation.Tests/TFusion.Foundation.Tests.csproj --locked-mode
+          dotnet restore tests/TFusion.Architecture.Tests/TFusion.Architecture.Tests.csproj --locked-mode
+
+      - name: Build portable projects
+        run: |
+          dotnet build tests/TFusion.Foundation.Tests/TFusion.Foundation.Tests.csproj --configuration Release --no-restore --property:Platform=x64
+          dotnet build tests/TFusion.Architecture.Tests/TFusion.Architecture.Tests.csproj --configuration Release --no-restore --property:Platform=x64
+
+      - name: Test portable projects and coverage
+        shell: pwsh
+        run: ./eng/test.ps1 -NoBuild
+
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: managed-core-failure
+          path: artifacts/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  windows-x64:
+    name: windows-x64
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.400
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+
+      - name: Full verification
+        shell: pwsh
+        run: ./eng/verify.ps1
+
+      - name: Diagnostics success and argument contracts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $executable = Get-ChildItem ./src/TFusion.Diagnostics/bin/x64/Release -Filter TFusion.Diagnostics.exe -Recurse | Select-Object -First 1
+          if ($null -eq $executable) { throw 'Diagnostics executable was not produced.' }
+
+          $successJson = & $executable.FullName --self-test --format json
+          if ($LASTEXITCODE -ne 0) { throw "Diagnostics self-test failed: $successJson" }
+          $success = $successJson | ConvertFrom-Json
+          if ($success.status -ne 'pass') { throw 'Diagnostics self-test did not report pass.' }
+
+          $invalidOutput = Join-Path $env:RUNNER_TEMP 'tfusion-diagnostics-invalid.json'
+          $invalidProcess = Start-Process -FilePath $executable.FullName -ArgumentList '--invalid' -NoNewWindow -Wait -PassThru -RedirectStandardOutput $invalidOutput
+          $invalidJson = Get-Content -LiteralPath $invalidOutput -Raw
+          if ($invalidProcess.ExitCode -eq 0) { throw 'Invalid diagnostics arguments returned success.' }
+          $invalid = $invalidJson | ConvertFrom-Json
+          if ($invalid.code -ne 'TFN-DIAG-INVALID-ARGUMENTS') { throw 'Invalid argument response code was wrong.' }
+
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-x64-failure
+          path: |
+            artifacts/
+            ~/AppData/Local/TFUSION-720/Logs/
+          if-no-files-found: ignore
+          retention-days: 14
