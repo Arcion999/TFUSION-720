@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "tfusion-kernel-native",
+  "version-string": "0.2.0",
+  "description": "Reproducible native dependencies for the TFUSION-720 OCCT bridge.",
+  "builtin-baseline": "04a9d8e5212d01ee1dd9478eadd9caade4f8b0d4",
+  "dependencies": [
+    {
+      "name": "opencascade",
+      "default-features": false,
+      "platform": "windows & x64"
+    }
+  ],
+  "overrides": [
+    {
+      "name": "opencascade",
+      "version": "8.0.1"
+    }
+  ]
+}
