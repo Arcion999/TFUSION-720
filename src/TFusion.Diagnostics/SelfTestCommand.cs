@@ -3,6 +3,7 @@ using System.Text.Json;
 using TFusion.Foundation;
 using TFusion.Foundation.Lifecycle;
 using TFusion.Foundation.Storage;
+using TFusion.Kernel.Interop;
 
 namespace TFusion.Diagnostics;
 
@@ -19,6 +20,7 @@ public sealed class SelfTestCommand
         ArgumentNullException.ThrowIfNull(standardError);
 
         var checks = new List<SelfTestCheck>();
+        var nativeKernel = NativeKernelReport.NotLoaded();
         var isolatedRoot = Path.Combine(
             Path.GetTempPath(),
             "TFUSION-720-self-test",
@@ -30,6 +32,7 @@ public sealed class SelfTestCommand
             checks.Add(CheckArchitecture());
             checks.Add(CheckBuildMetadata());
             checks.AddRange(CheckStorageAndSentinel(isolatedRoot));
+            checks.AddRange(CheckNativeKernel(out nativeKernel));
         }
         catch (Exception exception) when (
             exception is IOException
@@ -52,9 +55,12 @@ public sealed class SelfTestCommand
             Product: "TFUSION-720",
             Build: BuildInfo.Current,
             Checks: checks,
+            NativeKernel: nativeKernel,
             Capabilities: new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                ["cadKernel"] = "not-implemented",
+                ["cadKernel"] = nativeKernel.InitializationResult == "success"
+                    ? "occt-native-bridge-foundation"
+                    : "unavailable",
                 ["renderer"] = "not-implemented",
                 ["formatProviders"] = "not-implemented",
             }), JsonOptions));
@@ -125,6 +131,104 @@ public sealed class SelfTestCommand
         ];
     }
 
+    private static IEnumerable<SelfTestCheck> CheckNativeKernel(out NativeKernelReport report)
+    {
+        var abi = KernelBridge.QueryAbiVersion();
+        if (abi.IsFailure)
+        {
+            var diagnostic = abi.Diagnostics[0];
+            report = NativeKernelReport.Failed("load-failed", diagnostic.Code.ToString());
+            return
+            [
+                new SelfTestCheck(
+                    "nativeBridgeLoad",
+                    false,
+                    diagnostic.UserMessage,
+                    diagnostic.Code.ToString()),
+            ];
+        }
+
+        var negotiation = KernelBridge.NegotiateAbiVersion(KernelBridge.SupportedAbiVersion);
+        if (negotiation.IsFailure)
+        {
+            var diagnostic = negotiation.Diagnostics[0];
+            report = NativeKernelReport.Failed("loaded", diagnostic.Code.ToString(), abi.Value);
+            return
+            [
+                new SelfTestCheck("nativeBridgeLoad", true, "TFusion.Kernel.Native.dll loaded from the packaged output."),
+                new SelfTestCheck("nativeAbiNegotiation", false, diagnostic.UserMessage, diagnostic.Code.ToString()),
+            ];
+        }
+
+        var contextResult = KernelBridge.CreateContext("TFusion.Diagnostics");
+        if (contextResult.IsFailure)
+        {
+            var diagnostic = contextResult.Diagnostics[0];
+            report = NativeKernelReport.Failed("loaded", diagnostic.Code.ToString(), abi.Value);
+            return
+            [
+                new SelfTestCheck("nativeBridgeLoad", true, "TFusion.Kernel.Native.dll loaded from the packaged output."),
+                new SelfTestCheck("nativeBridgeInitialization", false, diagnostic.UserMessage, diagnostic.Code.ToString()),
+            ];
+        }
+
+        using var context = contextResult.Value;
+        var infoResult = context.GetBridgeInfo();
+        if (infoResult.IsFailure)
+        {
+            var diagnostic = infoResult.Diagnostics[0];
+            report = NativeKernelReport.Failed("loaded", diagnostic.Code.ToString(), abi.Value);
+            return
+            [
+                new SelfTestCheck("nativeBridgeLoad", true, "TFusion.Kernel.Native.dll loaded from the packaged output."),
+                new SelfTestCheck("nativeBridgeInitialization", false, diagnostic.UserMessage, diagnostic.Code.ToString()),
+            ];
+        }
+
+        var probeCreateResult = context.CreateRuntimeProbe();
+        if (probeCreateResult.IsFailure)
+        {
+            var diagnostic = probeCreateResult.Diagnostics[0];
+            report = NativeKernelReport.Failed("loaded", diagnostic.Code.ToString(), abi.Value);
+            return
+            [
+                new SelfTestCheck("nativeBridgeLoad", true, "TFusion.Kernel.Native.dll loaded from the packaged output."),
+                new SelfTestCheck("nativeBridgeInitialization", false, diagnostic.UserMessage, diagnostic.Code.ToString()),
+            ];
+        }
+
+        using var probe = probeCreateResult.Value;
+        var probeResult = probe.GetRuntimeOcctVersion();
+        var info = infoResult.Value;
+        var actualOcctExecuted = probeResult.IsSuccess
+            && string.Equals(probeResult.Value, info.RuntimeOcctVersion, StringComparison.Ordinal);
+        report = new NativeKernelReport(
+            "loaded",
+            info.AbiVersion,
+            info.CompiledOcctVersion,
+            info.RuntimeOcctVersion,
+            info.Architecture,
+            actualOcctExecuted ? "success" : "failed",
+            info.NativeBridgePath,
+            actualOcctExecuted ? null : probeResult.Diagnostics.FirstOrDefault()?.Code.ToString());
+
+        return
+        [
+            new SelfTestCheck("nativeBridgeLoad", true, "TFusion.Kernel.Native.dll loaded from the packaged output."),
+            new SelfTestCheck("nativeAbiNegotiation", negotiation.Value == 1, $"TFUSION native ABI v{negotiation.Value} negotiated."),
+            new SelfTestCheck(
+                "occtRuntimeExecution",
+                actualOcctExecuted,
+                actualOcctExecuted
+                    ? "The bridge executed the linked Open CASCADE runtime and returned matching version metadata."
+                    : "The Open CASCADE runtime probe failed."),
+            new SelfTestCheck(
+                "nativeBridgeInitialization",
+                actualOcctExecuted,
+                actualOcctExecuted ? "Native kernel context initialization succeeded." : "Native kernel context initialization failed."),
+        ];
+    }
+
     private static void TryRemoveIsolatedRoot(string isolatedRoot, TextWriter standardError)
     {
         try
@@ -146,7 +250,28 @@ public sealed class SelfTestCommand
         string Product,
         BuildInfo Build,
         IReadOnlyList<SelfTestCheck> Checks,
+        NativeKernelReport NativeKernel,
         IReadOnlyDictionary<string, string> Capabilities);
 
-    private sealed record SelfTestCheck(string Name, bool Passed, string Message);
+    private sealed record SelfTestCheck(string Name, bool Passed, string Message, string? Code = null);
+
+    private sealed record NativeKernelReport(
+        string LoadStatus,
+        uint? AbiVersion,
+        string? CompiledOcctVersion,
+        string? RuntimeOcctVersion,
+        string? Architecture,
+        string InitializationResult,
+        string? NativeBridgePath,
+        string? DiagnosticCode)
+    {
+        internal static NativeKernelReport NotLoaded() => new(
+            "not-attempted", null, null, null, null, "not-attempted", null, null);
+
+        internal static NativeKernelReport Failed(
+            string loadStatus,
+            string diagnosticCode,
+            uint? abiVersion = null) => new(
+                loadStatus, abiVersion, null, null, null, "failed", null, diagnosticCode);
+    }
 }

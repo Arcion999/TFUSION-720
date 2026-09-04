@@ -2,7 +2,7 @@
   <Target Name="TFusionRepositoryPolicy" BeforeTargets="PrepareForBuild">
     <Error
       Condition="'$(AllowUnsafeBlocks)' == 'true'"
-      Text="Unsafe code is prohibited in Milestone 1." />
+      Text="Unsafe managed code is prohibited by the approved interop architecture." />
   </Target>
 
   <Target Name="TFusionRejectPrereleasePackages" BeforeTargets="CollectPackageReferences">
@@ -14,5 +14,18 @@
     <Error
       Condition="'@(_TFusionPrereleasePackage)' != ''"
       Text="Prerelease package versions are prohibited: @(_TFusionPrereleasePackage)" />
+  </Target>
+
+  <Target
+    Name="TFusionCopyNativeRuntime"
+    AfterTargets="Build"
+    Condition="$([System.String]::Copy('$(TargetFramework)').Contains('-windows')) and Exists('$(MSBuildThisFileDirectory)artifacts/native/package')">
+    <ItemGroup>
+      <_TFusionNativeRuntime Include="$(MSBuildThisFileDirectory)artifacts/native/package/**/*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(_TFusionNativeRuntime)"
+      DestinationFiles="@(_TFusionNativeRuntime->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
   </Target>
 </Project>
