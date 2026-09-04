@@ -2,9 +2,9 @@
 
 ## MILESTONE STATUS
 
-**Status: PARTIAL — implementation, automated verification, required manual validation, and repository protection are complete; merge and merged-`main` CI remain.**
+**Status: PASS — implementation, automated verification, required manual validation, repository protection, merge, and merged-`main` verification are complete.**
 
-Milestone 2 remains blocked until PR #1 is merged and the merged `main` commit independently passes the required CI/CodeQL gate.
+Milestone 1 is formally accepted under the approved owner amendment. The verified merged-`main` commit is `ff2bef7ad35ffa8fbaad313d551c2113433ade8d`.
 
 ### Owner gate amendment
 
@@ -31,6 +31,7 @@ The amendment changes test scheduling only. Offline normal operation and non-adm
 - Clean Windows verification completed successfully on the candidate code.
 - Required Milestone 1 manual checks completed successfully under the owner amendment.
 - Active `Protect main` repository ruleset verified with PR requirement, deletion/force-push protection, and required `managed-core`, `windows-x64`, and `codeql-csharp` checks.
+- PR #1 merged to `main`; the resulting merge commit independently passed Milestone 1 CI and CodeQL.
 
 ### Automated verification evidence
 
@@ -82,6 +83,20 @@ Repository ruleset `Protect main` is active and targets the default branch. It:
 
 The ruleset currently has no bypass actor. This is stricter than the roadmap's suggested emergency-owner bypass and does not weaken the protected-branch gate.
 
+### Merged-main verification evidence
+
+**Merged-main commit:** `ff2bef7ad35ffa8fbaad313d551c2113433ade8d`
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Milestone 1 CI | PASS | [Run 33863189076](https://github.com/Arcion999/TFUSION-720/actions/runs/33863189076) (`push` on merged `main`) |
+| `managed-core` | PASS | Job `100992051040` in run 33863189076 |
+| `windows-x64` | PASS | Job `100992051462` in run 33863189076 |
+| CodeQL | PASS | [Run 33863189107](https://github.com/Arcion999/TFUSION-720/actions/runs/33863189107) (`push` on merged `main`) |
+| `codeql-csharp` | PASS | Job `100992051182` in run 33863189107 |
+
+The commit SHA and run/job conclusions were re-read from GitHub before this final status update. M1-M05 and M1-M06 remain optional/deferred; neither is represented as executed.
+
 ### Signed-off PASS/FAIL checklist
 
 - [x] Required files and five project responsibilities exist.
@@ -90,8 +105,8 @@ The ruleset currently has no bypass actor. This is stricter than the roadmap's s
 - [x] Every M1-U, M1-A, and M1-B automated test has passed on the tested candidate.
 - [x] Every **mandatory** M1-M manual test has passed under the 2026-09-04 owner amendment.
 - [x] M1-M05 and M1-M06 are explicitly documented as optional/deferred rather than falsely marked PASS.
-- [x] PR-head CI/CodeQL was green before the owner-amendment documentation commits; the updated head must be revalidated by GitHub Actions.
-- [ ] CI/CodeQL is green on the final merged `main` commit.
+- [x] PR-head CI/CodeQL completed successfully before merge.
+- [x] CI/CodeQL is green on merged `main` commit `ff2bef7ad35ffa8fbaad313d551c2113433ade8d`.
 - [x] Release x64 build has zero warnings under the verification gate.
 - [x] Coverage is at least 90% line and 85% branch; actual Foundation coverage is 100% / 100%.
 - [x] Locked restore and deterministic Foundation output pass.
@@ -101,20 +116,16 @@ The ruleset currently has no bypass actor. This is stricter than the roadmap's s
 - [x] WPF shell contains no false CAD functionality.
 - [x] No unapproved architecture deviation exists.
 
-### Remaining gate sequence
+### Gate closure
 
-1. Let the documentation/amendment commits complete the required PR checks.
-2. If the final PR-head checks are green, mark PR #1 ready and merge it to `main`.
-3. Verify Milestone 1 CI and CodeQL on the merged `main` commit.
-4. Update this report from `PARTIAL` to `PASS` with merged commit/run evidence.
-5. Only then begin Milestone 2.
+All mandatory Milestone 1 gates are complete under the approved owner amendment. Milestone 2 may begin from the latest green `main` after this documentation-only closure is merged and its resulting `main` checks are green.
 
 ### Known limitations / deferred qualification
 
 - M1-M05 offline manual qualification is deferred by owner decision; the offline-first product requirement remains unchanged.
 - M1-M06 standard-user manual qualification is deferred by owner decision; normal end-user operation must still not require administrator rights.
 - M1-M07 used a controlled equivalent storage-unavailable setup rather than a separate disposable Windows profile.
-- Final merged-`main` CI evidence cannot exist until the PR is merged.
+- Merged-`main` CI and CodeQL evidence is recorded above.
 
 ### Technical debt introduced
 
@@ -130,4 +141,4 @@ None. The owner amendment changes only Milestone 1 manual-gate scheduling.
 
 ### Recommended next milestone
 
-Do not begin Milestone 2 until PR #1 is merged, required checks pass on merged `main`, and this report is updated to final `PASS`.
+After this documentation-only closure passes its protected PR and merged-`main` checks, begin Milestone 2 — OCCT native bridge foundation — on a dedicated branch from that latest green `main`.
