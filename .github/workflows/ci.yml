@@ -59,7 +59,7 @@ jobs:
   windows-x64:
     name: windows-x64
     runs-on: windows-2025
-    timeout-minutes: 120
+    timeout-minutes: 180
     env:
       TFUSION_VCPKG_BINARY_CACHE: ${{ github.workspace }}\.tools\vcpkg-binary-cache
     steps:
@@ -78,6 +78,7 @@ jobs:
         with:
           path: ${{ github.workspace }}\.tools\vcpkg-binary-cache
           key: vcpkg-x64-windows-${{ hashFiles('native/TFusion.Kernel.Native/vcpkg.json') }}
+          save-always: true
 
       - name: Full verification
         shell: pwsh
