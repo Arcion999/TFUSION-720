@@ -6,6 +6,10 @@ if(NOT WIN32 OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "TFusion.Kernel.Native supports Windows x64 only.")
 endif()
 
+if(NOT MSVC)
+    message(FATAL_ERROR "TFusion.Kernel.Native requires the supported Microsoft MSVC x64 toolchain.")
+endif()
+
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
