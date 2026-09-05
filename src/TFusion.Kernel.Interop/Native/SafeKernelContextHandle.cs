@@ -4,7 +4,7 @@ namespace TFusion.Kernel.Interop.Native;
 
 internal sealed class SafeKernelContextHandle : SafeHandleZeroOrMinusOneIsInvalid
 {
-    private SafeKernelContextHandle()
+    internal SafeKernelContextHandle()
         : base(ownsHandle: true)
     {
     }
