@@ -202,6 +202,9 @@ public sealed class SelfTestCommand
         var info = infoResult.Value;
         var actualOcctExecuted = probeResult.IsSuccess
             && string.Equals(probeResult.Value, info.RuntimeOcctVersion, StringComparison.Ordinal);
+        var probeDiagnosticCode = actualOcctExecuted || probeResult.Diagnostics.Count == 0
+            ? null
+            : probeResult.Diagnostics[0].Code.ToString();
         report = new NativeKernelReport(
             "loaded",
             info.AbiVersion,
@@ -210,7 +213,7 @@ public sealed class SelfTestCommand
             info.Architecture,
             actualOcctExecuted ? "success" : "failed",
             info.NativeBridgePath,
-            actualOcctExecuted ? null : probeResult.Diagnostics.FirstOrDefault()?.Code.ToString());
+            probeDiagnosticCode);
 
         return
         [
