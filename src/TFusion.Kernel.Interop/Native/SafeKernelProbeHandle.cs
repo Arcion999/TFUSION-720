@@ -7,7 +7,7 @@ internal sealed class SafeKernelProbeHandle : SafeHandleZeroOrMinusOneIsInvalid
     private SafeKernelContextHandle? owner;
     private bool ownerReferenceAdded;
 
-    private SafeKernelProbeHandle()
+    internal SafeKernelProbeHandle()
         : base(ownsHandle: true)
     {
     }
