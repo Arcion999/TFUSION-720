@@ -3,7 +3,8 @@ param(
     [switch]$AddressSanitizer,
     [switch]$SkipTests,
     [switch]$SkipInstall,
-    [switch]$Rebuild
+    [switch]$Rebuild,
+    [switch]$ConfigureOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -76,6 +77,11 @@ Push-Location $nativeRoot
 try {
     cmake --preset $preset
     if ($LASTEXITCODE -ne 0) { throw "Native CMake configuration failed for $preset." }
+
+    if ($ConfigureOnly) {
+        Write-Host "Native dependencies and CMake configuration are ready for $preset."
+        return
+    }
 
     if ($Rebuild) {
         cmake --build --preset $preset --target clean
