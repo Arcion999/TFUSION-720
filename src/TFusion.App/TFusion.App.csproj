@@ -7,6 +7,7 @@
     <AssemblyName>TFusion.App</AssemblyName>
     <RootNamespace>TFusion.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\TFUSION-720.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,5 +19,9 @@
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
     <PackageReference Include="Serilog.Sinks.File" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\TFUSION-720.ico" />
   </ItemGroup>
 </Project>
