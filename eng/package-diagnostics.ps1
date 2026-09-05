@@ -35,14 +35,12 @@ try {
     }
 
     $report = $json | ConvertFrom-Json
-    if ($report.status -ne 'pass'
-        -or $report.nativeKernel.loadStatus -ne 'loaded'
-        -or $report.nativeKernel.abiVersion -ne 1
-        -or $report.nativeKernel.compiledOcctVersion -notmatch '8\.0\.1'
-        -or $report.nativeKernel.runtimeOcctVersion -notmatch '8\.0\.1'
-        -or $report.nativeKernel.initializationResult -ne 'success') {
-        throw "Packaged diagnostics did not truthfully reach OCCT: $json"
-    }
+    if ($report.status -ne 'pass') { throw "Packaged diagnostics did not truthfully reach OCCT: $json" }
+    if ($report.nativeKernel.loadStatus -ne 'loaded') { throw "Packaged diagnostics did not truthfully reach OCCT: $json" }
+    if ($report.nativeKernel.abiVersion -ne 1) { throw "Packaged diagnostics did not truthfully reach OCCT: $json" }
+    if ($report.nativeKernel.compiledOcctVersion -notmatch '8\.0\.1') { throw "Packaged diagnostics did not truthfully reach OCCT: $json" }
+    if ($report.nativeKernel.runtimeOcctVersion -notmatch '8\.0\.1') { throw "Packaged diagnostics did not truthfully reach OCCT: $json" }
+    if ($report.nativeKernel.initializationResult -ne 'success') { throw "Packaged diagnostics did not truthfully reach OCCT: $json" }
 
     $json | Out-File -LiteralPath (Join-Path $repositoryRoot 'artifacts/diagnostics-package-test.json') -Encoding utf8NoBOM
 
@@ -62,11 +60,10 @@ try {
     $failureJson = Get-Content -LiteralPath $failureOutput -Raw
     if ($failureProcess.ExitCode -eq 0) { throw 'Diagnostics returned success when its native bridge was absent.' }
     $failureReport = $failureJson | ConvertFrom-Json
-    if ($failureReport.status -ne 'fail'
-        -or $failureReport.nativeKernel.loadStatus -ne 'load-failed'
-        -or $failureReport.nativeKernel.diagnosticCode -ne 'TFN-KRN-LOAD') {
-        throw "Missing-bridge diagnostics were not structured correctly: $failureJson"
-    }
+    if ($failureReport.status -ne 'fail') { throw "Missing-bridge diagnostics were not structured correctly: $failureJson" }
+    if ($failureReport.nativeKernel.loadStatus -ne 'load-failed') { throw "Missing-bridge diagnostics were not structured correctly: $failureJson" }
+    if ($failureReport.nativeKernel.diagnosticCode -ne 'TFN-KRN-LOAD') { throw "Missing-bridge diagnostics were not structured correctly: $failureJson" }
+
     $failureJson | Out-File `
         -LiteralPath (Join-Path $repositoryRoot 'artifacts/diagnostics-missing-bridge-test.json') `
         -Encoding utf8NoBOM
