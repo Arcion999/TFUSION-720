@@ -55,6 +55,6 @@ internal static class RepositoryContext
     {
         var relative = Path.GetRelativePath(Root, path);
         var segments = relative.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        return segments.Any(segment => segment is "bin" or "obj" or "artifacts" or ".git");
+        return segments.Any(segment => segment is "bin" or "obj" or "artifacts" or ".git" or ".tools");
     }
 }
