@@ -33,14 +33,16 @@ TFusionStatus protect(
     }
     catch (const Standard_Failure& exception)
     {
-        const char* const detail = exception.GetMessageString();
+        const char* const detail = exception.what();
         return fail(
             contextHandle,
             TFUSION_STATUS_KERNEL_ERROR,
             operation,
             "The CAD kernel rejected the operation.",
             "An Open CASCADE exception was contained at the native ABI boundary.",
-            detail == nullptr ? "Open CASCADE supplied no exception detail." : detail);
+            detail == nullptr || detail[0] == '\0'
+                ? "Open CASCADE supplied no exception detail."
+                : detail);
     }
     catch (const std::exception& exception)
     {
