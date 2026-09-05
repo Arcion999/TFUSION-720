@@ -50,7 +50,7 @@ jobs:
   codeql-cpp:
     name: codeql-cpp
     runs-on: windows-2025
-    timeout-minutes: 120
+    timeout-minutes: 180
     env:
       TFUSION_VCPKG_BINARY_CACHE: ${{ github.workspace }}\.tools\vcpkg-binary-cache
     steps:
@@ -62,15 +62,20 @@ jobs:
         with:
           path: ${{ github.workspace }}\.tools\vcpkg-binary-cache
           key: vcpkg-x64-windows-${{ hashFiles('native/TFusion.Kernel.Native/vcpkg.json') }}
+          save-always: true
+
+      - name: Prepare native dependencies outside CodeQL tracing
+        shell: pwsh
+        run: ./eng/native-build.ps1 -ConfigureOnly
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           languages: cpp
 
-      - name: Build native bridge
+      - name: Rebuild project-owned native bridge for CodeQL
         shell: pwsh
-        run: ./eng/native-build.ps1 -SkipTests -SkipInstall
+        run: ./eng/native-build.ps1 -SkipTests -SkipInstall -Rebuild
 
       - name: Analyze
         uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
