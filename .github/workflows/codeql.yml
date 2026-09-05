@@ -11,6 +11,10 @@ on:
   schedule:
     - cron: "23 4 * * 3"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   security-events: write
@@ -49,6 +53,7 @@ jobs:
 
   codeql-cpp:
     name: codeql-cpp
+    needs: codeql-csharp
     runs-on: windows-2025
     timeout-minutes: 180
     env:
@@ -58,15 +63,22 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Restore native binary cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: native-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ github.workspace }}\.tools\vcpkg-binary-cache
           key: vcpkg-x64-windows-${{ hashFiles('native/TFusion.Kernel.Native/vcpkg.json') }}
-          save-always: true
 
       - name: Prepare native dependencies outside CodeQL tracing
         shell: pwsh
         run: ./eng/native-build.ps1 -ConfigureOnly
+
+      - name: Save native binary cache
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}\.tools\vcpkg-binary-cache
+          key: vcpkg-x64-windows-${{ hashFiles('native/TFusion.Kernel.Native/vcpkg.json') }}
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
