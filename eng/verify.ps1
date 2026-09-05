@@ -18,6 +18,10 @@ try {
     & (Join-Path $PSScriptRoot 'build.ps1')
     & (Join-Path $PSScriptRoot 'test.ps1') -NoBuild
 
+    if ($IsWindows) {
+        & (Join-Path $PSScriptRoot 'package-diagnostics.ps1')
+    }
+
     New-Item -ItemType Directory -Force -Path $artifactRoot | Out-Null
     $auditPath = Join-Path $artifactRoot 'dependency-audit.json'
     dotnet list $solution package --vulnerable --include-transitive --format json | Out-File `

@@ -9,5 +9,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TFusion.Foundation\TFusion.Foundation.csproj" />
+    <ProjectReference Include="..\TFusion.Kernel.Interop\TFusion.Kernel.Interop.csproj" />
   </ItemGroup>
 </Project>

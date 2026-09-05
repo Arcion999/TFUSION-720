@@ -2,7 +2,7 @@
   <Target Name="TFusionRepositoryPolicy" BeforeTargets="PrepareForBuild">
     <Error
       Condition="'$(AllowUnsafeBlocks)' == 'true'"
-      Text="Unsafe code is prohibited in Milestone 1." />
+      Text="Unsafe managed code is prohibited by the approved interop architecture." />
   </Target>
 
   <Target Name="TFusionRejectPrereleasePackages" BeforeTargets="CollectPackageReferences">
@@ -14,5 +14,33 @@
     <Error
       Condition="'@(_TFusionPrereleasePackage)' != ''"
       Text="Prerelease package versions are prohibited: @(_TFusionPrereleasePackage)" />
+  </Target>
+
+  <Target
+    Name="TFusionCopyNativeRuntime"
+    AfterTargets="Build"
+    Condition="'$(TFusionSkipNativeRuntime)' != 'true' and $([System.String]::Copy('$(TargetFramework)').Contains('-windows')) and Exists('$(MSBuildThisFileDirectory)artifacts/native/package')">
+    <ItemGroup>
+      <_TFusionNativeRuntime Include="$(MSBuildThisFileDirectory)artifacts/native/package/**/*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(_TFusionNativeRuntime)"
+      DestinationFiles="@(_TFusionNativeRuntime->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target
+    Name="TFusionIncludeNativeRuntimeInPublish"
+    BeforeTargets="ComputeFilesToPublish"
+    Condition="'$(TFusionSkipNativeRuntime)' != 'true' and ($([System.String]::Copy('$(TargetFramework)').Contains('-windows'))) and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe') and Exists('$(MSBuildThisFileDirectory)artifacts/native/package')">
+    <!-- Publish native runtime files only from the executable being published.
+         Project-reference libraries also execute ComputeFilesToPublish; adding the same
+         package from each referenced project produces NETSDK1152 duplicate output paths. -->
+    <ItemGroup>
+      <ResolvedFileToPublish Include="$(MSBuildThisFileDirectory)artifacts/native/package/**/*">
+        <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
   </Target>
 </Project>

@@ -8,9 +8,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFusion.Diagnostics", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFusion.Foundation", "src\TFusion.Foundation\TFusion.Foundation.csproj", "{8D2F594B-7A8A-47FC-B7A0-EFA42DD7FF45}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFusion.Kernel.Interop", "src\TFusion.Kernel.Interop\TFusion.Kernel.Interop.csproj", "{D2E8D7E5-315B-4B11-BE89-88B62E8DDB78}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFusion.Foundation.Tests", "tests\TFusion.Foundation.Tests\TFusion.Foundation.Tests.csproj", "{60349455-B101-4AC5-9688-93187F4D6964}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFusion.Architecture.Tests", "tests\TFusion.Architecture.Tests\TFusion.Architecture.Tests.csproj", "{EB18F4B3-57BA-4B5F-B0E9-B24815443861}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFusion.Kernel.Tests", "tests\TFusion.Kernel.Tests\TFusion.Kernel.Tests.csproj", "{A0E617E0-8A28-42FA-9F69-CB7E74D71BA3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +34,10 @@ Global
 		{8D2F594B-7A8A-47FC-B7A0-EFA42DD7FF45}.Debug|x64.Build.0 = Debug|x64
 		{8D2F594B-7A8A-47FC-B7A0-EFA42DD7FF45}.Release|x64.ActiveCfg = Release|x64
 		{8D2F594B-7A8A-47FC-B7A0-EFA42DD7FF45}.Release|x64.Build.0 = Release|x64
+		{D2E8D7E5-315B-4B11-BE89-88B62E8DDB78}.Debug|x64.ActiveCfg = Debug|x64
+		{D2E8D7E5-315B-4B11-BE89-88B62E8DDB78}.Debug|x64.Build.0 = Debug|x64
+		{D2E8D7E5-315B-4B11-BE89-88B62E8DDB78}.Release|x64.ActiveCfg = Release|x64
+		{D2E8D7E5-315B-4B11-BE89-88B62E8DDB78}.Release|x64.Build.0 = Release|x64
 		{60349455-B101-4AC5-9688-93187F4D6964}.Debug|x64.ActiveCfg = Debug|x64
 		{60349455-B101-4AC5-9688-93187F4D6964}.Debug|x64.Build.0 = Debug|x64
 		{60349455-B101-4AC5-9688-93187F4D6964}.Release|x64.ActiveCfg = Release|x64
@@ -38,5 +46,9 @@ Global
 		{EB18F4B3-57BA-4B5F-B0E9-B24815443861}.Debug|x64.Build.0 = Debug|x64
 		{EB18F4B3-57BA-4B5F-B0E9-B24815443861}.Release|x64.ActiveCfg = Release|x64
 		{EB18F4B3-57BA-4B5F-B0E9-B24815443861}.Release|x64.Build.0 = Release|x64
+		{A0E617E0-8A28-42FA-9F69-CB7E74D71BA3}.Debug|x64.ActiveCfg = Debug|x64
+		{A0E617E0-8A28-42FA-9F69-CB7E74D71BA3}.Debug|x64.Build.0 = Debug|x64
+		{A0E617E0-8A28-42FA-9F69-CB7E74D71BA3}.Release|x64.ActiveCfg = Release|x64
+		{A0E617E0-8A28-42FA-9F69-CB7E74D71BA3}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 EndGlobal

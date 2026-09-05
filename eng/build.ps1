@@ -9,6 +9,10 @@ $solution = Join-Path $repositoryRoot 'TFUSION-720.sln'
 
 Push-Location $repositoryRoot
 try {
+    if ($IsWindows) {
+        & (Join-Path $PSScriptRoot 'native-build.ps1')
+    }
+
     dotnet restore $solution --locked-mode
     if ($LASTEXITCODE -ne 0) { throw 'Locked restore failed.' }
 

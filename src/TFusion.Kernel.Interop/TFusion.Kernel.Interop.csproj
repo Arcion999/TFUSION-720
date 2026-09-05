@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AssemblyName>TFusion.Kernel.Interop</AssemblyName>
+    <RootNamespace>TFusion.Kernel.Interop</RootNamespace>
+    <Description>Owned managed boundary for the versioned TFUSION native CAD-kernel ABI.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TFusion.Foundation\TFusion.Foundation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TFusion.Kernel.Tests" />
+  </ItemGroup>
+</Project>

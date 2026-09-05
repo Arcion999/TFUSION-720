@@ -23,6 +23,7 @@
 *.nupkg
 *.snupkg
 packages/
+.tools/
 
 # OS metadata
 .DS_Store

@@ -1,4 +1,4 @@
-name: Milestone 1 CI
+name: Milestone 2 CI
 
 on:
   push:
@@ -8,6 +8,10 @@ on:
   pull_request:
     branches:
       - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -58,8 +62,11 @@ jobs:
 
   windows-x64:
     name: windows-x64
+    needs: managed-core
     runs-on: windows-2025
-    timeout-minutes: 30
+    timeout-minutes: 180
+    env:
+      TFUSION_VCPKG_BINARY_CACHE: ${{ github.workspace }}\.tools\vcpkg-binary-cache
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -71,9 +78,41 @@ jobs:
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
+      - name: Managed Windows preflight
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          dotnet restore TFUSION-720.sln --locked-mode
+          if ($LASTEXITCODE -ne 0) { throw 'Locked restore failed during Windows preflight.' }
+          dotnet build TFUSION-720.sln --configuration Release --no-restore --property:Platform=x64
+          if ($LASTEXITCODE -ne 0) { throw 'Managed Windows preflight failed.' }
+
+      - name: Restore native binary cache
+        id: native-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}\.tools\vcpkg-binary-cache
+          key: vcpkg-x64-windows-${{ hashFiles('native/TFusion.Kernel.Native/vcpkg.json') }}
+
+      - name: Prepare native dependencies on cache miss
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: ./eng/native-build.ps1 -ConfigureOnly
+
+      - name: Save native binary cache
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}\.tools\vcpkg-binary-cache
+          key: vcpkg-x64-windows-${{ hashFiles('native/TFusion.Kernel.Native/vcpkg.json') }}
+
       - name: Full verification
         shell: pwsh
         run: ./eng/verify.ps1
+
+      - name: Native AddressSanitizer lifecycle gate
+        shell: pwsh
+        run: ./eng/native-build.ps1 -AddressSanitizer -SkipInstall
 
       - name: Diagnostics success and argument contracts
         shell: pwsh
@@ -100,7 +139,23 @@ jobs:
         with:
           name: windows-x64-failure
           path: |
-            artifacts/
+            artifacts/test-results/
+            artifacts/*.json
+            artifacts/native/package/native-dependency-inventory.json
+            .tools/vcpkg/buildtrees/**/*.log
             ~/AppData/Local/TFUSION-720/Logs/
           if-no-files-found: ignore
           retention-days: 14
+
+      - name: Upload Milestone 2 evidence
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: milestone-2-windows-x64-evidence
+          path: |
+            artifacts/diagnostics-package-test.json
+            artifacts/diagnostics-missing-bridge-test.json
+            artifacts/native/package/native-dependency-inventory.json
+            artifacts/test-results/*.trx
+          if-no-files-found: error
+          retention-days: 30

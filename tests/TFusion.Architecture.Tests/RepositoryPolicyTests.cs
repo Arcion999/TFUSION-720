@@ -88,10 +88,10 @@ public sealed partial class RepositoryPolicyTests
     }
 
     [Fact]
-    public void M1A11ReadmeMakesNoSupportedCadCapabilityClaim()
+    public void M2A04ReadmeMakesNoUserFacingCadCapabilityClaim()
     {
         var readme = RepositoryContext.Read("README.md");
-        Assert.Contains("contains no CAD functionality", readme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("contains no user-facing CAD functionality", readme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("no file-format support", readme, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("supports STEP", readme, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("working CAD", readme, StringComparison.OrdinalIgnoreCase);
@@ -121,6 +121,72 @@ public sealed partial class RepositoryPolicyTests
 
         Assert.NotEmpty(dependencyNames);
         Assert.All(dependencyNames, package => Assert.Contains(package, notices, StringComparison.OrdinalIgnoreCase));
+        Assert.Contains("Open CASCADE Technology", notices, StringComparison.Ordinal);
+        Assert.Contains("LGPL-2.1-only WITH OCCT-exception-1.0", notices, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void M2A05OcctDependencyIsManifestPinnedToTheApprovedBaseline()
+    {
+        using var manifest = JsonDocument.Parse(RepositoryContext.Read("native/TFusion.Kernel.Native/vcpkg.json"));
+        var root = manifest.RootElement;
+        Assert.Equal("04a9d8e5212d01ee1dd9478eadd9caade4f8b0d4", root.GetProperty("builtin-baseline").GetString());
+
+        var occt = root.GetProperty("dependencies").EnumerateArray()
+            .Single(dependency => dependency.GetProperty("name").GetString() == "opencascade");
+        Assert.False(occt.GetProperty("default-features").GetBoolean());
+        Assert.Equal("windows & x64", occt.GetProperty("platform").GetString());
+
+        var occtOverride = root.GetProperty("overrides").EnumerateArray()
+            .Single(dependency => dependency.GetProperty("name").GetString() == "opencascade");
+        Assert.Equal("8.0.1", occtOverride.GetProperty("version").GetString());
+    }
+
+    [Fact]
+    public void M2A06PublicNativeHeaderContainsOnlyCAbiTypes()
+    {
+        var header = RepositoryContext.Read("native/TFusion.Kernel.Native/include/tfusion_kernel.h");
+        Assert.Contains("extern \"C\"", header, StringComparison.Ordinal);
+        Assert.Contains("TFUSION_CALL __cdecl", header, StringComparison.Ordinal);
+        Assert.Contains("uint64_t TFusionHandle", header, StringComparison.Ordinal);
+        Assert.Contains("structSize", header, StringComparison.Ordinal);
+        Assert.Contains("structVersion", header, StringComparison.Ordinal);
+
+        var forbidden = new[]
+        {
+            "std::", "TopoDS_", "Handle(", "Standard_", "template<", "std::string", "std::vector",
+        };
+        Assert.All(forbidden, value => Assert.DoesNotContain(value, header, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void M2A07EveryNativeExportUsesTheExceptionBoundary()
+    {
+        var header = RepositoryContext.Read("native/TFusion.Kernel.Native/include/tfusion_kernel.h");
+        var implementation = RepositoryContext.Read("native/TFusion.Kernel.Native/src/abi.cpp");
+        var exportCount = header.Split('\n').Count(line => line.StartsWith("TFUSION_API TFusionStatus", StringComparison.Ordinal));
+        var boundaryCount = implementation.Split("tfusion::protect(", StringSplitOptions.None).Length - 1;
+        Assert.True(exportCount > 0);
+        Assert.Equal(exportCount, boundaryCount);
+        Assert.Contains("catch (const Standard_Failure&", RepositoryContext.Read("native/TFusion.Kernel.Native/src/diagnostic.hpp"), StringComparison.Ordinal);
+        Assert.Contains("catch (const std::exception&", RepositoryContext.Read("native/TFusion.Kernel.Native/src/diagnostic.hpp"), StringComparison.Ordinal);
+        Assert.Contains("catch (...)", RepositoryContext.Read("native/TFusion.Kernel.Native/src/diagnostic.hpp"), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void M2A08NativeMilestoneDoesNotStartGeometryOrExchangeFeatures()
+    {
+        var nativeSource = string.Join('\n', RepositoryContext.Files("*", SearchOption.AllDirectories)
+            .Where(path => path.Contains(
+                $"{Path.DirectorySeparatorChar}native{Path.DirectorySeparatorChar}TFusion.Kernel.Native{Path.DirectorySeparatorChar}",
+                StringComparison.Ordinal)
+                && Path.GetExtension(path) is ".h" or ".hpp" or ".c" or ".cpp")
+            .Select(File.ReadAllText));
+        var forbidden = new[]
+        {
+            "BRepPrimAPI", "BRepAlgoAPI", "STEPControl", "IGESControl", "StlAPI", "BRepMesh", "TopoDS_Shape",
+        };
+        Assert.All(forbidden, value => Assert.DoesNotContain(value, nativeSource, StringComparison.Ordinal));
     }
 
     [Fact]

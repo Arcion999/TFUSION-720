@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-This inventory covers Milestone 1 dependencies restored or distributed with TFUSION-720. The committed `packages.lock.json` files are the authoritative resolved-version inventory; architecture test M1-A12 fails when a locked package name is absent here. Package metadata was reviewed from the upstream project and NuGet package metadata on 2026-09-03.
+This inventory covers Milestone 1 and Milestone 2 dependencies restored, built, or distributed with TFUSION-720. The committed NuGet `packages.lock.json` files and native vcpkg manifest/baseline are the authoritative dependency inventory. Package metadata was reviewed from upstream project metadata on 2026-09-04.
 
 TFUSION-720 itself is licensed under Apache License 2.0; see `LICENSE`.
 
@@ -75,3 +75,16 @@ The following are Apache-2.0-licensed Serilog/xUnit packages from their respecti
 - `xunit.v3.runner.inproc.console`
 
 Copyright notices and full license texts remain in their NuGet packages and upstream repositories. No third-party source code has been copied into this repository.
+
+## Native CAD kernel dependency
+
+| Component | Version | Use | License | Source |
+|---|---:|---|---|---|
+| Open CASCADE Technology (OCCT) | 8.0.1 | Dynamically linked exact CAD kernel runtime (`TKernel.dll`) behind `TFusion.Kernel.Native.dll` | LGPL-2.1-only WITH OCCT-exception-1.0 | Open-Cascade-SAS/OCCT tag `V8_0_1` |
+| vcpkg | baseline `04a9d8e5212d01ee1dd9478eadd9caade4f8b0d4` | Build-time dependency acquisition; not an application runtime dependency | MIT | microsoft/vcpkg |
+
+OCCT is acquired in manifest mode for the explicit `x64-windows` triplet. The manifest disables optional default features and overrides the OCCT port to exactly 8.0.1. TFUSION does not copy OCCT source code into this repository and does not expose OCCT C++ types in its public or managed interfaces.
+
+The packaged runtime includes the vcpkg-installed OCCT copyright and full license/exception text as `THIRD_PARTY-LICENSES/OCCT.txt`. TFUSION links OCCT dynamically and retains the recipients' ability to replace the compatible LGPL library. Microsoft/Windows system DLLs and the Visual C++ platform runtime remain normal platform prerequisites.
+
+OCCT 8.0.1 is the latest upstream serviced release checked for this milestone (released 2026-07-30). No applicable published security advisory was identified in the upstream release/security pages or the NVD search performed on 2026-09-04. This is a dated dependency review, not a guarantee that no undisclosed issue exists; automated dependency and scheduled security checks remain required.
