@@ -370,8 +370,7 @@ TFusionStatus TFUSION_CALL tfusion_test_exception_boundary(
         switch (exceptionProbe)
         {
         case TFUSION_EXCEPTION_PROBE_OCCT:
-            Standard_Failure::Raise(u8"OCCT boundary probe — presisjon");
-            break;
+            throw Standard_Failure(u8"OCCT boundary probe — presisjon");
         case TFUSION_EXCEPTION_PROBE_STANDARD:
             throw std::runtime_error("standard boundary probe");
         case TFUSION_EXCEPTION_PROBE_UNKNOWN:
@@ -379,7 +378,6 @@ TFusionStatus TFUSION_CALL tfusion_test_exception_boundary(
         default:
             return invalid_argument(contextHandle, "tfusion_test_exception_boundary", "The exception probe identifier is invalid.");
         }
-        return TFUSION_STATUS_INTERNAL_ERROR;
     });
 }
 
