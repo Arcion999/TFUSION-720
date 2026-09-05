@@ -9,12 +9,38 @@ if (-not $IsWindows) { throw 'The diagnostics package is Windows-only.' }
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $repositoryRoot 'src/TFusion.Diagnostics/TFusion.Diagnostics.csproj'
 $packageRoot = Join-Path $repositoryRoot 'artifacts/diagnostics-package'
+$nativePackageRoot = Join-Path $repositoryRoot 'artifacts/native/package'
 
+if (-not (Test-Path -LiteralPath $nativePackageRoot -PathType Container)) {
+    throw 'The native runtime package must be created before packaging diagnostics.'
+}
+
+if (Test-Path -LiteralPath $packageRoot) {
+    Remove-Item -LiteralPath $packageRoot -Recurse -Force
+}
 New-Item -ItemType Directory -Force -Path $packageRoot | Out-Null
-dotnet publish $project --configuration Release --no-restore --property:Platform=x64 --output $packageRoot
+
+# Publish managed diagnostics without injecting the native runtime through MSBuild.
+# The native package is staged exactly once below. This avoids NETSDK1152 when
+# publish traverses project references that also import Directory.Build.targets.
+dotnet publish $project `
+    --configuration Release `
+    --no-restore `
+    --property:Platform=x64 `
+    --property:TFusionSkipNativeRuntime=true `
+    --output $packageRoot
 if ($LASTEXITCODE -ne 0) { throw 'Diagnostics package creation failed.' }
 
-foreach ($requiredFile in @('TFusion.Diagnostics.exe', 'TFusion.Kernel.Native.dll', 'TKernel.dll')) {
+foreach ($item in Get-ChildItem -LiteralPath $nativePackageRoot -Force) {
+    Copy-Item -LiteralPath $item.FullName -Destination $packageRoot -Recurse -Force
+}
+
+foreach ($requiredFile in @(
+    'TFusion.Diagnostics.exe',
+    'TFusion.Kernel.Native.dll',
+    'TKernel.dll',
+    'native-dependency-inventory.json',
+    'THIRD_PARTY-LICENSES/OCCT.txt')) {
     if (-not (Test-Path -LiteralPath (Join-Path $packageRoot $requiredFile) -PathType Leaf)) {
         throw "Diagnostics package is incomplete: $requiredFile is missing."
     }
