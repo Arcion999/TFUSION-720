@@ -35,7 +35,7 @@ function Initialize-MsvcEnvironment {
         throw "The MSVC x64 environment script was not found: $vcvars"
     }
 
-    $environmentLines = & $env:ComSpec /d /s /c "`"$vcvars`" >nul && set"
+    $environmentLines = & $env:ComSpec /d /s /c "call `"$vcvars`" >nul && set"
     if ($LASTEXITCODE -ne 0) {
         throw 'Failed to initialize the MSVC x64 developer environment.'
     }
