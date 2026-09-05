@@ -2,7 +2,8 @@
 param(
     [switch]$AddressSanitizer,
     [switch]$SkipTests,
-    [switch]$SkipInstall
+    [switch]$SkipInstall,
+    [switch]$Rebuild
 )
 
 $ErrorActionPreference = 'Stop'
@@ -11,6 +12,52 @@ Set-StrictMode -Version Latest
 if (-not $IsWindows -or [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture -ne [Runtime.InteropServices.Architecture]::X64) {
     throw 'The OCCT native bridge can only be built on Windows x64.'
 }
+
+function Initialize-MsvcEnvironment {
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+    if (-not (Test-Path -LiteralPath $vswhere -PathType Leaf)) {
+        throw 'Visual Studio Installer vswhere.exe was not found.'
+    }
+
+    $installationPath = & $vswhere `
+        -latest `
+        -products '*' `
+        -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+        -property installationPath | Select-Object -First 1
+    if ([string]::IsNullOrWhiteSpace($installationPath)) {
+        throw 'A supported Visual Studio installation with the MSVC x64 toolchain was not found.'
+    }
+    $installationPath = $installationPath.Trim()
+
+    $vcvars = Join-Path $installationPath 'VC/Auxiliary/Build/vcvars64.bat'
+    if (-not (Test-Path -LiteralPath $vcvars -PathType Leaf)) {
+        throw "The MSVC x64 environment script was not found: $vcvars"
+    }
+
+    $environmentLines = & $env:ComSpec /d /s /c "`"$vcvars`" >nul && set"
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Failed to initialize the MSVC x64 developer environment.'
+    }
+
+    foreach ($line in $environmentLines) {
+        $separator = $line.IndexOf('=')
+        if ($separator -le 0) {
+            continue
+        }
+
+        $name = $line.Substring(0, $separator)
+        $value = $line.Substring($separator + 1)
+        Set-Item -Path "Env:$name" -Value $value
+    }
+
+    $compiler = Get-Command cl.exe -CommandType Application -ErrorAction SilentlyContinue
+    if ($null -eq $compiler) {
+        throw 'MSVC cl.exe was not available after developer-environment initialization.'
+    }
+    Write-Host "MSVC x64 compiler: $($compiler.Source)"
+}
+
+Initialize-MsvcEnvironment
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $nativeRoot = Join-Path $repositoryRoot 'native/TFusion.Kernel.Native'
@@ -29,6 +76,11 @@ Push-Location $nativeRoot
 try {
     cmake --preset $preset
     if ($LASTEXITCODE -ne 0) { throw "Native CMake configuration failed for $preset." }
+
+    if ($Rebuild) {
+        cmake --build --preset $preset --target clean
+        if ($LASTEXITCODE -ne 0) { throw "Native clean rebuild preparation failed for $preset." }
+    }
 
     cmake --build --preset $preset
     if ($LASTEXITCODE -ne 0) { throw "Native build failed for $preset." }
